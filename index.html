@@ -173,16 +173,15 @@
                                     <option value="hoy">Hoy</option>
                                     <option value="semana">Esta Semana</option>
                                     <option value="mes">Este Mes</option>
-                                    <option value="personalizado">Rango Personalizado</option>
                                 </select>
                             </div>
                             <div>
                                 <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Desde</label>
-                                <input type="date" id="filtro-desde" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-indigo-500">
+                                <input type="date" id="filtro-desde" disabled class="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-lg text-sm opacity-60">
                             </div>
                             <div>
                                 <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Hasta</label>
-                                <input type="date" id="filtro-hasta" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-indigo-500">
+                                <input type="date" id="filtro-hasta" disabled class="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-lg text-sm opacity-60">
                             </div>
                             <div>
                                 <button id="btn-pdf-report" class="w-full flex items-center justify-center gap-2 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm h-[38px]">
@@ -216,37 +215,17 @@
                             <table class="w-full text-left text-sm whitespace-nowrap">
                                 <thead class="bg-slate-50 text-slate-500 text-xs font-medium uppercase tracking-wider border-b border-slate-100">
                                     <tr>
-                                        <th class="px-6 py-3 text-center w-16">Acción</th>
                                         <th class="px-6 py-3">Fecha Calendario</th>
+                                        <th class="px-6 py-3 text-center">Yape</th>
+                                        <th class="px-6 py-3 text-center">Plin</th>
+                                        <th class="px-6 py-3 text-center">Efectivo</th>
                                         <th class="px-6 py-3 text-center">Gaseosas</th>
                                         <th class="px-6 py-3 text-center">Gastos</th>
                                         <th class="px-6 py-3 text-right">Dinero Quedando (Neto)</th>
                                     </tr>
                                 </thead>
                                 <tbody id="reporte-tbody" class="divide-y divide-slate-100 text-slate-700">
-                                    <tr class="hover:bg-slate-50/80 transition-colors">
-                                        <td class="px-6 py-3.5 text-center">
-                                            <button class="p-1 bg-indigo-50 text-indigo-600 rounded hover:bg-indigo-100" title="Ver Detalles">
-                                                <i data-lucide="search" class="w-4 h-4"></i>
-                                            </button>
-                                        </td>
-                                        <td class="px-6 py-3.5 font-medium">Total del día: 03/06/2026</td>
-                                        <td class="px-6 py-3.5 text-center">S/ 45.00</td>
-                                        <td class="px-6 py-3.5 text-center text-red-500">S/ 12.00</td>
-                                        <td class="px-6 py-3.5 text-right font-bold text-emerald-600">S/ 767.20</td>
-                                    </tr>
-                                    <tr class="hover:bg-slate-50/80 transition-colors">
-                                        <td class="px-6 py-3.5 text-center">
-                                            <button class="p-1 bg-indigo-50 text-indigo-600 rounded hover:bg-indigo-100">
-                                                <i data-lucide="search" class="w-4 h-4"></i>
-                                            </button>
-                                        </td>
-                                        <td class="px-6 py-3.5 font-medium">Total del día: 02/06/2026</td>
-                                        <td class="px-6 py-3.5 text-center">S/ 30.00</td>
-                                        <td class="px-6 py-3.5 text-center text-red-500">S/ 0.00</td>
-                                        <td class="px-6 py-3.5 text-right font-bold text-emerald-600">S/ 181.70</td>
-                                    </tr>
-                                </tbody>
+                                    </tbody>
                             </table>
                         </div>
                     </div>
@@ -257,21 +236,21 @@
     </div>
 
     <script>
-        // Inicialización corregida de Supabase con tus llaves reales
         const SUPABASE_URL = "https://qjzhlqliempopuntudyc.supabase.co";
         const SUPABASE_KEY = "sb_publishable_4zAnWJaBRfljr3zncC84ZA_4LpjScZd";
         const supabaseApp = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        let usuarioActualEmail = "";
+        let listaCierres = [];
+
         lucide.createIcons();
 
-        // Colocar fecha actual por defecto en el formulario
         document.getElementById('caja-fecha').value = new Date().toISOString().split('T')[0];
-        
         document.getElementById('current-date').textContent = new Date().toLocaleDateString('es-ES', { 
             weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
         });
 
-        // --- AUTENTICACIÓN REAL CON SUPABASE ---
+        // --- AUTENTICACIÓN ---
         const authContainer = document.getElementById('auth-container');
         const appContainer = document.getElementById('app-container');
         const authForm = document.getElementById('auth-form');
@@ -284,19 +263,19 @@
             const email = document.getElementById('auth-email').value;
             const password = document.getElementById('auth-password').value;
 
-            const { data, error } = await supabaseApp.auth.signInWithPassword({
-                email: email,
-                password: password,
-            });
+            const { data, error } = await supabaseApp.auth.signInWithPassword({ email, password });
 
             if (error) {
                 authError.textContent = "Error: " + error.message;
                 authError.classList.remove('hidden');
             } else {
+                usuarioActualEmail = data.user.email;
                 authContainer.classList.add('hidden');
                 appContainer.classList.remove('opacity-30', 'pointer-events-none');
-                document.getElementById('user-display-email').textContent = data.user.email;
-                console.log("Sesión iniciada con éxito:", data.user.id);
+                document.getElementById('user-display-email').textContent = usuarioActualEmail;
+                
+                // Cargar datos reales una vez logueado
+                cargarHistorialReal();
             }
         });
 
@@ -306,28 +285,135 @@
             appContainer.classList.add('opacity-30', 'pointer-events-none');
         });
 
-        // --- LÓGICA DE CÁLCULO EN TIEMPO REAL ---
+        // --- CÁLCULO EN TIEMPO REAL ---
         const inputsCalculo = document.querySelectorAll('.input-calculo');
         const previewTotal = document.getElementById('caja-total-preview');
 
-        function calcularBalance() {
-            const yape = parseFloat(document.getElementById('caja-yape').value) || 0;
-            const plin = parseFloat(document.getElementById('caja-plin').value) || 0;
-            const efectivo = parseFloat(document.getElementById('caja-efectivo').value) || 0;
-            const gaseosas = parseFloat(document.getElementById('caja-gaseosas').value) || 0;
-            const gastos = parseFloat(document.getElementById('caja-gastos').value) || 0;
+        function obtenerValoresCaja() {
+            return {
+                fecha: document.getElementById('caja-fecha').value,
+                yape: parseFloat(document.getElementById('caja-yape').value) || 0,
+                plin: parseFloat(document.getElementById('caja-plin').value) || 0,
+                efectivo: parseFloat(document.getElementById('caja-efectivo').value) || 0,
+                gaseosas: parseFloat(document.getElementById('caja-gaseosas').value) || 0,
+                gastos: parseFloat(document.getElementById('caja-gastos').value) || 0
+            };
+        }
 
+        function calcularBalance() {
+            const { yape, plin, efectivo, gaseosas, gastos } = obtenerValoresCaja();
             const totalNeto = (yape + plin + efectivo + gaseosas) - gastos;
             
             previewTotal.textContent = `S/ ${totalNeto.toFixed(2)}`;
-            if(totalNeto < 0) {
-                previewTotal.className = "text-2xl font-bold tracking-tight text-red-500";
+            previewTotal.className = totalNeto < 0 ? "text-2xl font-bold tracking-tight text-red-500" : "text-2xl font-bold tracking-tight text-emerald-400";
+            return totalNeto;
+        }
+        inputsCalculo.forEach(input => input.addEventListener('input', calcularBalance));
+
+        // --- GUARDAR CIERRE EN BASE DE DATOS REAL ---
+        document.getElementById('form-caja').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const datos = obtenerValoresCaja();
+            const totalNeto = (datos.yape + datos.plin + datos.efectivo + datos.gaseosas) - datos.gastos;
+
+            const { error } = await supabaseApp.from('cierres_caja').upsert({
+                usuario_email: usuarioActualEmail,
+                fecha: datos.fecha,
+                yape: datos.yape,
+                plin: datos.plin,
+                efectivo: datos.efectivo,
+                gaseosas: datos.gaseosas,
+                gastos: datos.gastos,
+                total_neto: totalNeto
+            }, { onConflict: 'fecha' });
+
+            if (error) {
+                alert("Error al guardar en base de datos: " + error.message);
             } else {
-                previewTotal.className = "text-2xl font-bold tracking-tight text-emerald-400";
+                alert("¡Cierre de caja guardado con éxito!");
+                document.getElementById('form-caja').reset();
+                document.getElementById('caja-fecha').value = new Date().toISOString().split('T')[0];
+                calcularBalance();
+                cargarHistorialReal(); // Actualiza la pestaña de reportes instantáneamente
             }
+        });
+
+        // --- CARGAR DATOS DESDE SUPABASE ---
+        async function cargarHistorialReal() {
+            const { data, error } = await supabaseApp
+                .from('cierres_caja')
+                .select('*')
+                .order('fecha', { ascending: false });
+
+            if (error) {
+                console.error("Error cargando historial:", error.message);
+                return;
+            }
+
+            listaCierres = data || [];
+            filtrarYAplicarDatos();
         }
 
-        inputsCalculo.forEach(input => input.addEventListener('input', calcularBalance));
+        function filtrarYAplicarDatos() {
+            const filtro = document.getElementById('filtro-periodo').value;
+            const hoyStr = new Date().toISOString().split('T')[0];
+            
+            let datosFiltrados = listaCierres;
+
+            if (filtro === 'hoy') {
+                datosFiltrados = listaCierres.filter(c => c.fecha === hoyStr);
+            } else if (filtro === 'semana') {
+                const haceUnaSemana = new Date();
+                haceUnaSemana.setDate(haceUnaSemana.getDate() - 7);
+                datosFiltrados = listaCierres.filter(c => new Date(c.fecha) >= haceUnaSemana);
+            } else if (filtro === 'mes') {
+                const esteMes = new Date().getMonth();
+                const esteAnio = new Date().getFullYear();
+                datosFiltrados = listaCierres.filter(c => {
+                    const f = new Date(c.fecha);
+                    return f.getMonth() === esteMes && f.getFullYear() === esteAnio;
+                });
+            }
+
+            // Renderizar en la Tabla
+            const tbody = document.getElementById('reporte-tbody');
+            tbody.innerHTML = "";
+
+            let sumTotal = 0, sumEfectivo = 0, sumDigital = 0, sumGaseosas = 0;
+
+            if (datosFiltrados.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="px-6 py-8 text-center text-slate-400 text-xs">No hay cierres registrados para este período.</td></tr>`;
+            } else {
+                datosFiltrados.forEach(c => {
+                    sumTotal += Number(c.total_neto);
+                    sumEfectivo += Number(c.efectivo);
+                    sumDigital += (Number(c.yape) + Number(c.plin));
+                    sumGaseosas += Number(c.gaseosas);
+
+                    const fechaFormateada = c.fecha.split('-').reverse().join('/');
+
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-slate-50/80 transition-colors">
+                            <td class="px-6 py-3.5 font-medium">Total del día: ${fechaFormateada}</td>
+                            <td class="px-6 py-3.5 text-center">S/ ${Number(c.yape).toFixed(2)}</td>
+                            <td class="px-6 py-3.5 text-center">S/ ${Number(c.plin).toFixed(2)}</td>
+                            <td class="px-6 py-3.5 text-center">S/ ${Number(c.efectivo).toFixed(2)}</td>
+                            <td class="px-6 py-3.5 text-center">S/ ${Number(c.gaseosas).toFixed(2)}</td>
+                            <td class="px-6 py-3.5 text-center text-red-500">S/ ${Number(c.gastos).toFixed(2)}</td>
+                            <td class="px-6 py-3.5 text-right font-bold text-emerald-600">S/ ${Number(c.total_neto).toFixed(2)}</td>
+                        </tr>
+                    `;
+                });
+            }
+
+            // Actualizar KPIs superiores
+            document.getElementById('kpi-total').textContent = `S/ ${sumTotal.toFixed(2)}`;
+            document.getElementById('kpi-efectivo').textContent = `S/ ${sumEfectivo.toFixed(2)}`;
+            document.getElementById('kpi-digital').textContent = `S/ ${sumDigital.toFixed(2)}`;
+            document.getElementById('kpi-gaseosas').textContent = `S/ ${sumGaseosas.toFixed(2)}`;
+        }
+
+        document.getElementById('filtro-periodo').addEventListener('change', filtrarYAplicarDatos);
 
         // --- MANEJO DE VISTAS (TABS) ---
         const navButtons = document.querySelectorAll('.nav-btn');
