@@ -6,8 +6,6 @@
     <title>Triple J - Cierre y Balance Diario</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         .sidebar-transition { transition: transform 0.3s ease-in-out; }
@@ -33,12 +31,12 @@
             
             <form id="auth-form" class="space-y-5">
                 <div>
-                    <label for="auth-email" class="block text-xs font-medium uppercase tracking-wider text-slate-600 mb-1.5">Correo Electrónico</label>
-                    <input type="email" id="auth-email" required class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors" placeholder="usuario@correo.com">
+                    <label class="block text-xs font-medium uppercase tracking-wider text-slate-600 mb-1.5">Correo Electrónico</label>
+                    <input type="email" id="auth-email" required class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-indigo-500" placeholder="usuario@correo.com">
                 </div>
                 <div>
-                    <label for="auth-password" class="block text-xs font-medium uppercase tracking-wider text-slate-600 mb-1.5">Contraseña</label>
-                    <input type="password" id="auth-password" required class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors" placeholder="••••••••">
+                    <label class="block text-xs font-medium uppercase tracking-wider text-slate-600 mb-1.5">Contraseña</label>
+                    <input type="password" id="auth-password" required class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-indigo-500" placeholder="••••••••">
                 </div>
                 <button type="submit" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg text-sm transition-colors shadow-sm">
                     Ingresar al Sistema
@@ -69,6 +67,9 @@
                 </button>
                 <button data-target="mod-reportes" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors hover:bg-slate-800 hover:text-white">
                     <i data-lucide="history" class="w-4 h-4"></i> Historial y Reportes
+                </button>
+                <button data-target="mod-gaseosas" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors hover:bg-slate-800 hover:text-white">
+                    <i data-lucide="beer" class="w-4 h-4"></i> Gestión de Gaseosas
                 </button>
             </nav>
 
@@ -102,53 +103,60 @@
 
             <main class="flex-1 overflow-y-auto p-4 md:p-8 space-y-6">
                 
+                <!-- 1. REGISTRO DIARIO -->
                 <section id="mod-registro" class="tab-content active space-y-6">
-                    <div class="max-w-3xl mx-auto bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="max-w-4xl mx-auto bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
                         <div class="p-6 border-b border-slate-100 bg-slate-50/50">
                             <h3 class="text-base font-semibold text-slate-900">Declaración de Ingresos y Egresos</h3>
-                            <p class="text-xs text-slate-500 mt-0.5">Ingresa los totales calculados al cierre del día actual.</p>
                         </div>
                         
                         <form id="form-caja" class="p-6 space-y-6">
                             <div>
                                 <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Fecha del Balance</label>
-                                <input type="date" id="caja-fecha" required class="w-full max-w-xs px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-indigo-500">
+                                <input type="date" id="caja-fecha" required class="w-full max-w-xs px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm">
                             </div>
 
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 <div class="space-y-4">
                                     <h4 class="text-xs font-bold text-indigo-600 uppercase tracking-wide">Ingresos Digitales</h4>
                                     <div>
-                                        <label class="block text-xs font-medium text-slate-600 mb-1">Monto Total Yape (S/)</label>
-                                        <input type="number" id="caja-yape" step="0.01" min="0" value="0.00" class="input-calculo w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-indigo-500">
+                                        <label class="block text-xs font-medium text-slate-600 mb-1">Monto Yape (S/)</label>
+                                        <input type="number" id="caja-yape" step="0.01" min="0" class="input-calculo w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm" placeholder="0.00">
                                     </div>
                                     <div>
-                                        <label class="block text-xs font-medium text-slate-600 mb-1">Monto Total Plin (S/)</label>
-                                        <input type="number" id="caja-plin" step="0.01" min="0" value="0.00" class="input-calculo w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-indigo-500">
+                                        <label class="block text-xs font-medium text-slate-600 mb-1">Monto Plin (S/)</label>
+                                        <input type="number" id="caja-plin" step="0.01" min="0" class="input-calculo w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm" placeholder="0.00">
+                                    </div>
+                                    <h4 class="text-xs font-bold text-red-600 uppercase tracking-wide pt-2">Egresos</h4>
+                                    <div>
+                                        <label class="block text-xs font-medium text-slate-600 mb-1">Gastos del Día (S/)</label>
+                                        <input type="number" id="caja-gastos" step="0.01" min="0" class="input-calculo w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-red-600" placeholder="0.00">
                                     </div>
                                 </div>
 
                                 <div class="space-y-4">
-                                    <h4 class="text-xs font-bold text-emerald-600 uppercase tracking-wide">Efectivo, Ventas Especiales y Gastos</h4>
+                                    <h4 class="text-xs font-bold text-emerald-600 uppercase tracking-wide">Efectivo Recaudado</h4>
                                     <div>
-                                        <label class="block text-xs font-medium text-slate-600 mb-1">Efectivo Recaudado (S/)</label>
-                                        <input type="number" id="caja-efectivo" step="0.01" min="0" value="0.00" class="input-calculo w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-indigo-500">
+                                        <label class="block text-xs font-medium text-slate-600 mb-1">Efectivo en Caja (S/)</label>
+                                        <input type="number" id="caja-efectivo" step="0.01" min="0" class="input-calculo w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm" placeholder="0.00">
                                     </div>
-                                    <div>
-                                        <label class="block text-xs font-medium text-slate-600 mb-1">Venta de Gaseosas (S/)</label>
-                                        <input type="number" id="caja-gaseosas" step="0.01" min="0" value="0.00" class="input-calculo w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-indigo-500">
+                                </div>
+
+                                <div class="space-y-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                                    <h4 class="text-xs font-bold text-amber-600 uppercase tracking-wide">Unidades Vendidas (Gaseosas)</h4>
+                                    <div id="contenedor-ventas-gaseosas" class="space-y-3 max-h-64 overflow-y-auto pr-1">
+                                        <!-- Se autogenera dinámicamente -->
                                     </div>
-                                    <div>
-                                        <label class="block text-xs font-medium text-slate-600 mb-1">Gastos / Egresos del Día (S/)</label>
-                                        <input type="number" id="caja-gastos" step="0.01" min="0" value="0.00" class="input-calculo w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-indigo-500 text-red-600">
+                                    <div class="pt-2 border-t border-slate-200 text-right">
+                                        <p class="text-[11px] text-slate-500 font-medium">Subtotal Gaseosas:</p>
+                                        <p id="subtotal-gaseosas-preview" class="text-sm font-bold text-slate-800">S/ 0.00</p>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="mt-6 p-4 bg-slate-900 text-white rounded-xl flex items-center justify-between">
                                 <div>
-                                    <p class="text-xs text-slate-400 uppercase tracking-wider font-medium">Balance Neto del Día (Dinero Quedando)</p>
-                                    <p class="text-[10px] text-slate-400 mt-0.5">(Yape + Plin + Efectivo + Gaseosas) - Gastos</p>
+                                    <p class="text-xs text-slate-400 uppercase tracking-wider font-medium">Balance Neto Diario</p>
                                 </div>
                                 <div class="text-right">
                                     <span id="caja-total-preview" class="text-2xl font-bold tracking-tight text-emerald-400">S/ 0.00</span>
@@ -162,17 +170,18 @@
                     </div>
                 </section>
 
+                <!-- 2. HISTORIAL Y REPORTES -->
                 <section id="mod-reportes" class="tab-content space-y-6">
-                    
                     <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
                         <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 items-end">
                             <div>
                                 <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Filtrar por Período</label>
-                                <select id="filtro-periodo" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-indigo-500 text-slate-700 font-medium">
+                                <select id="filtro-periodo" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium">
                                     <option value="todo">Mostrar Todo el Historial</option>
                                     <option value="hoy">Hoy</option>
                                     <option value="semana">Esta Semana</option>
                                     <option value="mes">Este Mes</option>
+                                    <option value="personalizado">Rango Personalizado</option>
                                 </select>
                             </div>
                             <div>
@@ -183,14 +192,9 @@
                                 <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Hasta</label>
                                 <input type="date" id="filtro-hasta" disabled class="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-lg text-sm opacity-60">
                             </div>
-                            <div>
-                                <button id="btn-pdf-report" class="w-full flex items-center justify-center gap-2 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm h-[38px]">
-                                    <i data-lucide="file-text" class="w-4 h-4"></i> Descargar PDF
-                                </button>
-                            </div>
                         </div>
 
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-slate-100">
+                        <div class="grid grid-cols-2 md:grid-cols-5 gap-4 pt-4 border-t border-slate-100">
                             <div class="p-3 bg-indigo-50/50 border border-indigo-100/50 rounded-lg">
                                 <p class="text-[10px] uppercase font-bold text-slate-400">Total Neto Filtrado</p>
                                 <p id="kpi-total" class="text-base font-bold text-indigo-600 mt-0.5">S/ 0.00</p>
@@ -206,6 +210,10 @@
                             <div class="p-3 bg-slate-50 rounded-lg">
                                 <p class="text-[10px] uppercase font-bold text-slate-400">Total Gaseosas</p>
                                 <p id="kpi-gaseosas" class="text-sm font-semibold text-slate-700 mt-0.5">S/ 0.00</p>
+                            </div>
+                            <div class="p-3 bg-emerald-50/50 border border-emerald-100/50 rounded-lg">
+                                <p class="text-[10px] uppercase font-bold text-emerald-600">Ganancia Estimada Gaseosas</p>
+                                <p id="kpi-ganancia-gaseosas" class="text-sm font-bold text-emerald-600 mt-0.5">S/ 0.00</p>
                             </div>
                         </div>
                     </div>
@@ -224,9 +232,54 @@
                                         <th class="px-6 py-3 text-right">Dinero Quedando (Neto)</th>
                                     </tr>
                                 </thead>
-                                <tbody id="reporte-tbody" class="divide-y divide-slate-100 text-slate-700">
-                                    </tbody>
+                                <tbody id="reporte-tbody" class="divide-y divide-slate-100 text-slate-700"></tbody>
                             </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 3. GESTIÓN DE PRODUCTOS / GASEOSAS -->
+                <section id="mod-gaseosas" class="tab-content space-y-6">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm h-fit">
+                            <h3 class="text-sm font-semibold text-slate-900 mb-4">Agregar Nuevo Producto</h3>
+                            <form id="form-nuevo-producto" class="space-y-4">
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-600 mb-1">Nombre de la Gaseosa</label>
+                                    <input type="text" id="prod-nombre" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm" placeholder="Ej: Fanta Piña">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-600 mb-1">Precio de Compra (Costo S/)</label>
+                                    <input type="number" id="prod-compra" step="0.01" min="0" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm" placeholder="0.00">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-600 mb-1">Precio de Venta (Público S/)</label>
+                                    <input type="number" id="prod-venta" step="0.01" min="0" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm" placeholder="0.00">
+                                </div>
+                                <button type="submit" class="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium rounded-lg transition-colors">
+                                    Registrar Producto
+                                </button>
+                            </form>
+                        </div>
+
+                        <div class="lg:col-span-2 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                            <div class="p-4 border-b border-slate-100 bg-slate-50/50">
+                                <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wide">Lista de Precios e Inventario Maestro</h3>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-sm whitespace-nowrap">
+                                    <thead class="bg-slate-50 text-slate-500 text-xs font-medium border-b border-slate-100">
+                                        <tr>
+                                            <th class="px-6 py-2.5">Producto</th>
+                                            <th class="px-4 py-2.5 text-center">Costo (S/)</th>
+                                            <th class="px-4 py-2.5 text-center">Venta (S/)</th>
+                                            <th class="px-4 py-2.5 text-center">Margen / Utilidad</th>
+                                            <th class="px-6 py-2.5 text-center">Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="inventario-tbody" class="divide-y divide-slate-100 text-slate-700"></tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </section>
@@ -242,40 +295,56 @@
 
         let usuarioActualEmail = "";
         let listaCierres = [];
+        let listaProductos = [];
+        let ventasDetalleMaestro = [];
 
         lucide.createIcons();
-
         document.getElementById('caja-fecha').value = new Date().toISOString().split('T')[0];
         document.getElementById('current-date').textContent = new Date().toLocaleDateString('es-ES', { 
             weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
         });
 
+        // --- MANEJO DE FILTROS FECHA (DESDE / HASTA) ---
+        const filtroPeriodo = document.getElementById('filtro-periodo');
+        const filtroDesde = document.getElementById('filtro-desde');
+        const filtroHasta = document.getElementById('filtro-hasta');
+
+        filtroPeriodo.addEventListener('change', () => {
+            if (filtroPeriodo.value === 'personalizado') {
+                filtroDesde.disabled = false; filtroDesde.classList.remove('bg-slate-100', 'opacity-60');
+                filtroHasta.disabled = false; filtroHasta.classList.remove('bg-slate-100', 'opacity-60');
+            } else {
+                filtroDesde.disabled = true; filtroDesde.classList.add('bg-slate-100', 'opacity-60');
+                filtroHasta.disabled = true; filtroHasta.classList.add('bg-slate-100', 'opacity-60');
+                filtroDesde.value = ""; filtroHasta.value = "";
+                filtrarYAplicarDatos();
+            }
+        });
+        filtroDesde.addEventListener('input', filtrarYAplicarDatos);
+        filtroHasta.addEventListener('input', filtrarYAplicarDatos);
+
         // --- AUTENTICACIÓN ---
         const authContainer = document.getElementById('auth-container');
         const appContainer = document.getElementById('app-container');
-        const authForm = document.getElementById('auth-form');
-        const authError = document.getElementById('auth-error');
-
-        authForm.addEventListener('submit', async (e) => {
-            e.preventDefault(); 
-            authError.classList.add('hidden'); 
-            
+        
+        document.getElementById('auth-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            document.getElementById('auth-error').classList.add('hidden');
             const email = document.getElementById('auth-email').value;
             const password = document.getElementById('auth-password').value;
 
             const { data, error } = await supabaseApp.auth.signInWithPassword({ email, password });
-
             if (error) {
-                authError.textContent = "Error: " + error.message;
-                authError.classList.remove('hidden');
+                document.getElementById('auth-error').textContent = "Error: " + error.message;
+                document.getElementById('auth-error').classList.remove('hidden');
             } else {
                 usuarioActualEmail = data.user.email;
                 authContainer.classList.add('hidden');
                 appContainer.classList.remove('opacity-30', 'pointer-events-none');
                 document.getElementById('user-display-email').textContent = usuarioActualEmail;
                 
-                // Cargar datos reales una vez logueado
-                cargarHistorialReal();
+                await cargarProductosMaestros();
+                await cargarHistorialReal();
             }
         });
 
@@ -285,104 +354,178 @@
             appContainer.classList.add('opacity-30', 'pointer-events-none');
         });
 
-        // --- CÁLCULO EN TIEMPO REAL ---
-        const inputsCalculo = document.querySelectorAll('.input-calculo');
-        const previewTotal = document.getElementById('caja-total-preview');
-
-        function obtenerValoresCaja() {
-            return {
-                fecha: document.getElementById('caja-fecha').value,
-                yape: parseFloat(document.getElementById('caja-yape').value) || 0,
-                plin: parseFloat(document.getElementById('caja-plin').value) || 0,
-                efectivo: parseFloat(document.getElementById('caja-efectivo').value) || 0,
-                gaseosas: parseFloat(document.getElementById('caja-gaseosas').value) || 0,
-                gastos: parseFloat(document.getElementById('caja-gastos').value) || 0
-            };
+        // --- CARGAR PRODUCTOS ---
+        async function cargarProductosMaestros() {
+            const { data } = await supabaseApp.from('productos').select('*').order('nombre', { ascending: true });
+            listaProductos = data || [];
+            renderizarSeccionInventario();
+            renderizarFormularioVentaGaseosas();
         }
 
+        function renderizarSeccionInventario() {
+            const tbody = document.getElementById('inventario-tbody');
+            tbody.innerHTML = "";
+            listaProductos.forEach(p => {
+                const margen = p.precio_venta - p.precio_compra;
+                tbody.innerHTML += `
+                    <tr class="text-xs">
+                        <td class="px-6 py-2.5 font-medium text-slate-900">${p.nombre}</td>
+                        <td class="px-4 py-2.5 text-center">S/ ${Number(p.precio_compra).toFixed(2)}</td>
+                        <td class="px-4 py-2.5 text-center">S/ ${Number(p.precio_venta).toFixed(2)}</td>
+                        <td class="px-4 py-2.5 text-center font-semibold text-emerald-600">S/ ${margen.toFixed(2)}</td>
+                        <td class="px-6 py-2.5 text-center">
+                            <button onclick="eliminarProducto(${p.id})" class="text-red-500 hover:text-red-700 font-medium">Eliminar</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function renderizarFormularioVentaGaseosas() {
+            const contenedor = document.getElementById('contenedor-ventas-gaseosas');
+            contenedor.innerHTML = "";
+            listaProductos.forEach(p => {
+                contenedor.innerHTML += `
+                    <div class="flex items-center justify-between text-xs bg-white p-2 rounded-lg border border-slate-100">
+                        <span class="font-medium text-slate-700">${p.nombre} <span class="text-slate-400 font-normal">(S/ ${Number(p.precio_venta).toFixed(2)})</span></span>
+                        <input type="number" data-id="${p.id}" data-venta="${p.precio_venta}" min="0" class="input-gaseosa-unidad w-16 px-2 py-1 bg-slate-50 border border-slate-200 rounded text-center" placeholder="0">
+                    </div>
+                `;
+            });
+            document.querySelectorAll('.input-gaseosa-unidad').forEach(i => i.addEventListener('input', calcularBalance));
+        }
+
+        // --- REGISTRAR NUEVO PRODUCTO ---
+        document.getElementById('form-nuevo-producto').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const nombre = document.getElementById('prod-nombre').value;
+            const precio_compra = parseFloat(document.getElementById('prod-compra').value) || 0;
+            const precio_venta = parseFloat(document.getElementById('prod-venta').value) || 0;
+
+            await supabaseApp.from('productos').insert({ nombre, precio_compra, precio_venta });
+            document.getElementById('form-nuevo-producto').reset();
+            await cargarProductosMaestros();
+        });
+
+        async function eliminarProducto(id) {
+            if(confirm("¿Seguro que deseas eliminar este producto?")) {
+                await supabaseApp.from('productos').delete().eq('id', id);
+                await cargarProductosMaestros();
+            }
+        }
+
+        // --- CÁLCULOS DEL CUADRANTE ---
         function calcularBalance() {
-            const { yape, plin, efectivo, gaseosas, gastos } = obtenerValoresCaja();
-            const totalNeto = (yape + plin + efectivo + gaseosas) - gastos;
-            
+            const yape = parseFloat(document.getElementById('caja-yape').value) || 0;
+            const plin = parseFloat(document.getElementById('caja-plin').value) || 0;
+            const efectivo = parseFloat(document.getElementById('caja-efectivo').value) || 0;
+            const gastos = parseFloat(document.getElementById('caja-gastos').value) || 0;
+
+            let subtotalGaseosas = 0;
+            document.querySelectorAll('.input-gaseosa-unidad').forEach(input => {
+                const cant = parseInt(input.value) || 0;
+                const precio = parseFloat(input.dataset.venta) || 0;
+                subtotalGaseosas += (cant * precio);
+            });
+
+            document.getElementById('subtotal-gaseosas-preview').textContent = `S/ ${subtotalGaseosas.toFixed(2)}`;
+
+            const totalNeto = (yape + plin + efectivo + subtotalGaseosas) - gastos;
+            const previewTotal = document.getElementById('caja-total-preview');
             previewTotal.textContent = `S/ ${totalNeto.toFixed(2)}`;
             previewTotal.className = totalNeto < 0 ? "text-2xl font-bold tracking-tight text-red-500" : "text-2xl font-bold tracking-tight text-emerald-400";
             return totalNeto;
         }
-        inputsCalculo.forEach(input => input.addEventListener('input', calcularBalance));
+        document.querySelectorAll('.input-calculo').forEach(i => i.addEventListener('input', calcularBalance));
 
-        // --- GUARDAR CIERRE EN BASE DE DATOS REAL ---
+        // --- COMPORTAMIENTO GUARDAR CIERRE ---
         document.getElementById('form-caja').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const datos = obtenerValoresCaja();
-            const totalNeto = (datos.yape + datos.plin + datos.efectivo + datos.gaseosas) - datos.gastos;
+            const fecha = document.getElementById('caja-fecha').value;
+            const yape = parseFloat(document.getElementById('caja-yape').value) || 0;
+            const plin = parseFloat(document.getElementById('caja-plin').value) || 0;
+            const efectivo = parseFloat(document.getElementById('caja-efectivo').value) || 0;
+            const gastos = parseFloat(document.getElementById('caja-gastos').value) || 0;
 
-            const { error } = await supabaseApp.from('cierres_caja').upsert({
-                usuario_email: usuarioActualEmail,
-                fecha: datos.fecha,
-                yape: datos.yape,
-                plin: datos.plin,
-                efectivo: datos.efectivo,
-                gaseosas: datos.gaseosas,
-                gastos: datos.gastos,
-                total_neto: totalNeto
+            let totalGaseosas = 0;
+            let arreglosVentasDetalle = [];
+
+            document.querySelectorAll('.input-gaseosa-unidad').forEach(input => {
+                const cantidad = parseInt(input.value) || 0;
+                if (cantidad > 0) {
+                    const prodId = input.dataset.id;
+                    const prodMaster = listaProductos.find(p => p.id == prodId);
+                    totalGaseosas += (cantidad * prodMaster.precio_venta);
+
+                    arreglosVentasDetalle.push({
+                        fecha: fecha,
+                        producto_id: prodId,
+                        cantidad: cantidad,
+                        precio_compra_historico: prodMaster.precio_compra,
+                        precio_venta_historico: prodMaster.precio_venta
+                    });
+                }
+            });
+
+            const totalNeto = (yape + plin + efectivo + totalGaseosas) - gastos;
+
+            // Guardar en la tabla principal de Cierres
+            const { error: errCierre } = await supabaseApp.from('cierres_caja').upsert({
+                usuario_email: usuarioActualEmail, fecha, yape, plin, efectivo, gaseosas: totalGaseosas, gastos, total_neto: totalNeto
             }, { onConflict: 'fecha' });
 
-            if (error) {
-                alert("Error al guardar en base de datos: " + error.message);
-            } else {
-                alert("¡Cierre de caja guardado con éxito!");
-                document.getElementById('form-caja').reset();
-                document.getElementById('caja-fecha').value = new Date().toISOString().split('T')[0];
-                calcularBalance();
-                cargarHistorialReal(); // Actualiza la pestaña de reportes instantáneamente
+            if(errCierre) { alert(errCierre.message); return; }
+
+            // Guardar el desglose de gaseosas vendidas
+            if(arreglosVentasDetalle.length > 0) {
+                await supabaseApp.from('ventas_gaseosas_detalle').delete().eq('fecha', fecha);
+                await supabaseApp.from('ventas_gaseosas_detalle').insert(arreglosVentasDetalle);
             }
+
+            alert("¡Cierre diario guardado con éxito!");
+            document.getElementById('form-caja').reset();
+            document.getElementById('caja-fecha').value = new Date().toISOString().split('T')[0];
+            calcularBalance();
+            await cargarHistorialReal();
         });
 
-        // --- CARGAR DATOS DESDE SUPABASE ---
+        // --- LEER HISTORIAL Y FILTRADO ---
         async function cargarHistorialReal() {
-            const { data, error } = await supabaseApp
-                .from('cierres_caja')
-                .select('*')
-                .order('fecha', { ascending: false });
-
-            if (error) {
-                console.error("Error cargando historial:", error.message);
-                return;
-            }
-
-            listaCierres = data || [];
+            const { data: dataCierres } = await supabaseApp.from('cierres_caja').select('*').order('fecha', { ascending: false });
+            const { data: dataDetalles } = await supabaseApp.from('ventas_gaseosas_detalle').select('*');
+            
+            listaCierres = dataCierres || [];
+            ventasDetalleMaestro = dataDetalles || [];
             filtrarYAplicarDatos();
         }
 
         function filtrarYAplicarDatos() {
-            const filtro = document.getElementById('filtro-periodo').value;
+            const filtro = filtroPeriodo.value;
             const hoyStr = new Date().toISOString().split('T')[0];
-            
             let datosFiltrados = listaCierres;
 
             if (filtro === 'hoy') {
                 datosFiltrados = listaCierres.filter(c => c.fecha === hoyStr);
             } else if (filtro === 'semana') {
-                const haceUnaSemana = new Date();
-                haceUnaSemana.setDate(haceUnaSemana.getDate() - 7);
-                datosFiltrados = listaCierres.filter(c => new Date(c.fecha) >= haceUnaSemana);
+                const limite = new Date(); limite.setDate(limite.getDate() - 7);
+                datosFiltrados = listaCierres.filter(c => new Date(c.fecha) >= limite);
             } else if (filtro === 'mes') {
-                const esteMes = new Date().getMonth();
-                const esteAnio = new Date().getFullYear();
-                datosFiltrados = listaCierres.filter(c => {
-                    const f = new Date(c.fecha);
-                    return f.getMonth() === esteMes && f.getFullYear() === esteAnio;
-                });
+                const m = new Date().getMonth(); const a = new Date().getFullYear();
+                datosFiltrados = listaCierres.filter(c => { const f = new Date(c.fecha); return f.getMonth() === m && f.getFullYear() === a; });
+            } else if (filtro === 'personalizado') {
+                const desdeVal = filtroDesde.value;
+                const hastaVal = filtroHasta.value;
+                if (desdeVal) datosFiltrados = datosFiltrados.filter(c => c.fecha >= desdeVal);
+                if (hastaVal) datosFiltrados = datosFiltrados.filter(c => c.fecha <= hastaVal);
             }
 
-            // Renderizar en la Tabla
             const tbody = document.getElementById('reporte-tbody');
             tbody.innerHTML = "";
 
-            let sumTotal = 0, sumEfectivo = 0, sumDigital = 0, sumGaseosas = 0;
+            let sumTotal = 0, sumEfectivo = 0, sumDigital = 0, sumGaseosas = 0, sumGananciaGaseosas = 0;
 
             if (datosFiltrados.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="px-6 py-8 text-center text-slate-400 text-xs">No hay cierres registrados para este período.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" class="px-6 py-6 text-center text-slate-400 text-xs">No hay registros para este período.</td></tr>`;
             } else {
                 datosFiltrados.forEach(c => {
                     sumTotal += Number(c.total_neto);
@@ -390,52 +533,46 @@
                     sumDigital += (Number(c.yape) + Number(c.plin));
                     sumGaseosas += Number(c.gaseosas);
 
-                    const fechaFormateada = c.fecha.split('-').reverse().join('/');
+                    // Calcular ganancia neta histórica de gaseosas de este día específico
+                    const detallesDelDia = ventasDetalleMaestro.filter(d => d.fecha === c.fecha);
+                    detallesDelDia.forEach(d => {
+                        const utilidadUnitaria = d.precio_venta_historico - d.precio_compra_historico;
+                        sumGananciaGaseosas += (d.cantidad * utilidadUnitaria);
+                    });
 
                     tbody.innerHTML += `
-                        <tr class="hover:bg-slate-50/80 transition-colors">
-                            <td class="px-6 py-3.5 font-medium">Total del día: ${fechaFormateada}</td>
-                            <td class="px-6 py-3.5 text-center">S/ ${Number(c.yape).toFixed(2)}</td>
-                            <td class="px-6 py-3.5 text-center">S/ ${Number(c.plin).toFixed(2)}</td>
-                            <td class="px-6 py-3.5 text-center">S/ ${Number(c.efectivo).toFixed(2)}</td>
-                            <td class="px-6 py-3.5 text-center">S/ ${Number(c.gaseosas).toFixed(2)}</td>
-                            <td class="px-6 py-3.5 text-center text-red-500">S/ ${Number(c.gastos).toFixed(2)}</td>
-                            <td class="px-6 py-3.5 text-right font-bold text-emerald-600">S/ ${Number(c.total_neto).toFixed(2)}</td>
+                        <tr class="hover:bg-slate-50/80 transition-colors text-xs">
+                            <td class="px-6 py-3 font-medium">Total del día: ${c.fecha.split('-').reverse().join('/')}</td>
+                            <td class="px-6 py-3 text-center">S/ ${Number(c.yape).toFixed(2)}</td>
+                            <td class="px-6 py-3 text-center">S/ ${Number(c.plin).toFixed(2)}</td>
+                            <td class="px-6 py-3 text-center">S/ ${Number(c.efectivo).toFixed(2)}</td>
+                            <td class="px-6 py-3 text-center">S/ ${Number(c.gaseosas).toFixed(2)}</td>
+                            <td class="px-6 py-3 text-center text-red-500">S/ ${Number(c.gastos).toFixed(2)}</td>
+                            <td class="px-6 py-3 text-right font-bold text-emerald-600">S/ ${Number(c.total_neto).toFixed(2)}</td>
                         </tr>
                     `;
                 });
             }
 
-            // Actualizar KPIs superiores
             document.getElementById('kpi-total').textContent = `S/ ${sumTotal.toFixed(2)}`;
             document.getElementById('kpi-efectivo').textContent = `S/ ${sumEfectivo.toFixed(2)}`;
             document.getElementById('kpi-digital').textContent = `S/ ${sumDigital.toFixed(2)}`;
             document.getElementById('kpi-gaseosas').textContent = `S/ ${sumGaseosas.toFixed(2)}`;
+            document.getElementById('kpi-ganancia-gaseosas').textContent = `S/ ${sumGananciaGaseosas.toFixed(2)}`;
         }
 
-        document.getElementById('filtro-periodo').addEventListener('change', filtrarYAplicarDatos);
-
-        // --- MANEJO DE VISTAS (TABS) ---
+        // --- NAVEGACIÓN TABS ---
         const navButtons = document.querySelectorAll('.nav-btn');
         const tabContents = document.querySelectorAll('.tab-content');
-        const pageTitle = document.getElementById('page-title');
-        const sidebar = document.getElementById('sidebar');
-
         navButtons.forEach(btn => {
             btn.addEventListener('click', () => {
                 navButtons.forEach(b => b.classList.remove('active', 'bg-slate-800', 'text-white'));
                 tabContents.forEach(c => c.classList.remove('active'));
-
                 btn.classList.add('active', 'bg-slate-800', 'text-white');
-                const target = btn.getAttribute('data-target');
-                document.getElementById(target).classList.add('active');
-                pageTitle.textContent = btn.innerText.trim();
-                sidebar.classList.add('-translate-x-full');
+                document.getElementById(btn.getAttribute('data-target')).classList.add('active');
+                document.getElementById('page-title').textContent = btn.innerText.trim();
             });
         });
-
-        document.getElementById('open-sidebar').addEventListener('click', () => sidebar.classList.remove('-translate-x-full'));
-        document.getElementById('close-sidebar').addEventListener('click', () => sidebar.classList.add('-translate-x-full'));
     </script>
 </body>
 </html>
