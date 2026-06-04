@@ -7,6 +7,9 @@
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Librerías para Generación de PDFs -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
     <style>
         .sidebar-transition { transition: transform 0.3s ease-in-out; }
         .tab-content { display: none; }
@@ -207,6 +210,15 @@
                                 <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Hasta</label>
                                 <input type="date" id="filtro-hasta" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm">
                             </div>
+                            <!-- BOTONES DE EXPORTACIÓN PDF -->
+                            <div class="lg:col-span-1 flex flex-col sm:flex-row gap-2 w-full">
+                                <button id="btn-pdf-detallado" class="flex-1 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium rounded-lg shadow-sm transition-colors cursor-pointer flex items-center justify-center gap-1.5">
+                                    <i data-lucide="download" class="w-3.5 h-3.5"></i> PDF Detallado
+                                </button>
+                                <button id="btn-pdf-minka" class="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium rounded-lg shadow-sm transition-colors cursor-pointer flex items-center justify-center gap-1.5">
+                                    <i data-lucide="file-text" class="w-3.5 h-3.5"></i> Formato Minka
+                                </button>
+                            </div>
                         </div>
 
                         <div class="grid grid-cols-2 md:grid-cols-5 gap-4 pt-4 border-t border-slate-100">
@@ -320,6 +332,7 @@
         let listaCierres = [];
         let listaProductos = [];
         let ventasDetalleMaestro = [];
+        let datosFiltradosGlobal = []; // Copia de lo que se ve en la tabla para los PDF
         
         // Control Modo Edición del Cuadrante
         let modoEdicionActivo = false;
@@ -413,7 +426,7 @@
         document.getElementById('btn-logout').addEventListener('click', async () => {
             if(confirm("¿Estás seguro de que deseas cerrar sesión en este dispositivo?")) {
                 await supabaseApp.auth.signOut();
-                window.location.reload(); // Recarga limpia para bloquear el app
+                window.location.reload();
             }
         });
 
@@ -535,7 +548,7 @@
         }
         document.querySelectorAll('.input-calculo').forEach(i => i.addEventListener('input', calcularBalance));
 
-        // --- SOLUCIÓN PUNTO EDICIÓN INTELIGENTE: ACCIÓN CLIC EDITAR DESDE REPORTES ---
+        // --- ACCIÓN CLIC EDITAR DESDE REPORTES ---
         function prepararEdicionCierre(fechaCierre) {
             const cierre = listaCierres.find(c => c.fecha === fechaCierre);
             if(!cierre) return;
@@ -544,36 +557,30 @@
             fechaEdicionOriginal = fechaCierre;
             desglosePrevioEdicion = ventasDetalleMaestro.filter(d => d.fecha === fechaCierre);
 
-            // 1. Mostrar interfaz visual de edición
             document.getElementById('titulo-formulario-caja').textContent = "Corregir Datos del Cuadrante Diario";
             document.getElementById('badge-modo-edicion').classList.remove('hidden');
             document.getElementById('btn-cancelar-edicion').classList.remove('hidden');
             document.getElementById('btn-submit-caja').textContent = "Aplicar y Modificar Balance";
 
-            // 2. Colocar datos en el formulario
             document.getElementById('caja-fecha').value = cierre.fecha;
-            document.getElementById('caja-fecha').disabled = true; // No se cambia la fecha editando
+            document.getElementById('caja-fecha').disabled = true;
             document.getElementById('caja-yape').value = cierre.yape;
             document.getElementById('caja-plin').value = cierre.plin;
             document.getElementById('caja-efectivo').value = cierre.efectivo;
             document.getElementById('caja-gastos').value = cierre.gastos;
 
-            // Limpiar inputs gaseosas primero
             document.querySelectorAll('.input-gaseosa-unidad').forEach(input => input.value = "");
 
-            // 3. Rellenar las gaseosas vendidas ese día
             desglosePrevioEdicion.forEach(d => {
                 const input = document.getElementById(`input-prod-id-${d.producto_id}`);
                 if(input) {
                     input.value = d.cantidad;
-                    // Ajustar temporalmente el stock disponible visual sumándole lo vendido
                     const stockSeguro = parseInt(input.dataset.stock) || 0;
                     document.getElementById(`label-stock-id-${d.producto_id}`).textContent = `Stock disponible: ${stockSeguro + d.cantidad} u. (Editando)`;
                 }
             });
 
             calcularBalance();
-            // 4. Mover al usuario a la primera pestaña
             cambiarPestaña('mod-registro', document.getElementById('btn-nav-registro'));
         }
 
@@ -591,7 +598,6 @@
             document.getElementById('form-caja').reset();
             document.getElementById('caja-fecha').value = new Date().toISOString().split('T')[0];
             
-            // Restablecer etiquetas stock
             listaProductos.forEach(p => {
                 document.getElementById(`label-stock-id-${p.id}`).textContent = `Stock disponible: ${p.stock || 0} u.`;
             });
@@ -600,7 +606,7 @@
 
         document.getElementById('btn-cancelar-edicion').addEventListener('click', desactivarModoEdicion);
 
-        // --- ENVIAR FORMULARIO (CREAR O EDITAR CON CONTROL DE STOCK) ---
+        // --- ENVIAR FORMULARIO ---
         document.getElementById('form-caja').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -615,14 +621,12 @@
             let actualizacionesStockPromesas = [];
             let stockInsuficiente = false;
 
-            // Procesar stock de cada bebida
             for (let input of document.querySelectorAll('.input-gaseosa-unidad')) {
                 const cantidadNueva = parseInt(input.value) || 0;
                 const prodId = input.dataset.id;
                 const prodMaster = listaProductos.find(p => p.id == prodId);
                 const stockEnBaseDatos = prodMaster ? prodMaster.stock : 0;
 
-                // Si estamos editando, recuperamos las unidades viejas para calcular el stock real disponible original
                 const registroViejo = modoEdicionActivo ? desglosePrevioEdicion.find(d => d.producto_id == prodId) : null;
                 const cantidadVieja = registroViejo ? registroViejo.cantidad : 0;
                 
@@ -646,7 +650,6 @@
                         });
                     }
 
-                    // El nuevo stock será el que había originalmente menos lo nuevo ingresado
                     const stockFinalCalculado = stockVirtualDisponible - cantidadNueva;
                     actualizacionesStockPromesas.push(
                         supabaseApp.from('productos').update({ stock: stockFinalCalculado }).eq('id', prodId)
@@ -658,18 +661,15 @@
 
             const totalNeto = (yape + plin + efectivo + totalGaseosas) - gastos;
 
-            // 1. Guardar Cierre de Caja
             await supabaseApp.from('cierres_caja').upsert({
                 usuario_email: usuarioActualEmail, fecha, yape, plin, efectivo, gaseosas: totalGaseosas, gastos, total_neto: totalNeto
             }, { onConflict: 'fecha' });
 
-            // 2. Limpiar desglose anterior de ese día e insertar el nuevo
             await supabaseApp.from('ventas_gaseosas_detalle').delete().eq('fecha', fecha);
             if(arreglosVentasDetalle.length > 0) {
                 await supabaseApp.from('ventas_gaseosas_detalle').insert(arreglosVentasDetalle);
             }
 
-            // 3. Correr la actualización masiva de stocks en Supabase
             if(actualizacionesStockPromesas.length > 0) {
                 await Promise.all(actualizacionesStockPromesas);
             }
@@ -681,7 +681,7 @@
             await cargarHistorialReal();
         });
 
-        // --- LEER HISTORIAL ---
+        // --- LEER HISTORIAL Y APLICAR FILTROS ---
         async function cargarHistorialReal() {
             const { data: dataCierres } = await supabaseApp.from('cierres_caja').select('*').order('fecha', { ascending: false });
             const { data: dataDetalles } = await supabaseApp.from('ventas_gaseosas_detalle').select('*');
@@ -700,6 +700,8 @@
             else if (filtro === 'mes') { const m = new Date().getMonth(); const a = new Date().getFullYear(); datosFiltrados = listaCierres.filter(c => { const f = new Date(c.fecha); return f.getMonth() === m && f.getFullYear() === a; }); }
             else if (filtro === 'dia-especifico') { const d = filtroDiaUnico.value; datosFiltrados = d ? listaCierres.filter(c => c.fecha === d) : []; }
             else if (filtro === 'personalizado') { const desdeVal = filtroDesde.value; const hastaVal = filtroHasta.value; if (desdeVal) datosFiltrados = datosFiltrados.filter(c => c.fecha >= desdeVal); if (hastaVal) datosFiltrados = datosFiltrados.filter(c => c.fecha <= hastaVal); }
+
+            datosFiltradosGlobal = datosFiltrados; // Asignación para los reportes PDF
 
             const tbody = document.getElementById('reporte-tbody');
             tbody.innerHTML = "";
@@ -740,8 +742,6 @@
 
         async function eliminarCierreCompleto(fechaFormateada) {
             if (confirm(`¿Seguro que deseas eliminar por completo el registro del día ${fechaFormateada.split('-').reverse().join('/')}? Esto restablecerá el stock vendido.`)) {
-                
-                // Devolver stock antes de borrar el registro
                 const detallesABorrar = ventasDetalleMaestro.filter(d => d.fecha === fechaFormateada);
                 const promesasDevolucion = detallesABorrar.map(d => {
                     const prod = listaProductos.find(p => p.id == d.producto_id);
@@ -758,6 +758,189 @@
                 await cargarHistorialReal();
             }
         }
+
+        // ==========================================
+        //  LÓGICA EXPORTACIÓN PDF 1: DETALLADO CLÁSICO
+        // ==========================================
+        document.getElementById('btn-pdf-detallado').addEventListener('click', () => {
+            if(datosFiltradosGlobal.length === 0) { alert("No hay datos en pantalla para exportar."); return; }
+            
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('p', 'mm', 'a4');
+            
+            doc.setFont("helvetica", "bold"); doc.setFontSize(16); doc.text("TRIPLE J - REPORTE DE CAJA E HISTORIAL", 14, 18);
+            doc.setFont("helvetica", "normal"); doc.setFontSize(9); doc.text(`Generado el: ${new Date().toLocaleString()}`, 14, 24);
+            doc.text(`Filtro Aplicado: ${document.getElementById('filtro-periodo').options[document.getElementById('filtro-periodo').selectedIndex].text}`, 14, 29);
+            
+            const filasTabla = [];
+            let totalNeto = 0, totalEfectivo = 0, totalDigital = 0, totalGaseosas = 0, totalGastos = 0;
+
+            // Ordenar cronológicamente ascendente para el PDF
+            const datosOrdenados = [...datosFiltradosGlobal].sort((a,b) => new Date(a.fecha) - new Date(b.fecha));
+
+            datosOrdenados.forEach(c => {
+                totalNeto += Number(c.total_neto); totalEfectivo += Number(c.efectivo); totalDigital += (Number(c.yape) + Number(c.plin)); totalGaseosas += Number(c.gaseosas); totalGastos += Number(c.gastos);
+                filasTabla.push([
+                    c.fecha.split('-').reverse().join('/'),
+                    `S/ ${Number(c.yape).toFixed(2)}`,
+                    `S/ ${Number(c.plin).toFixed(2)}`,
+                    `S/ ${Number(c.efectivo).toFixed(2)}`,
+                    `S/ ${Number(c.gaseosas).toFixed(2)}`,
+                    `S/ ${Number(c.gastos).toFixed(2)}`,
+                    `S/ ${Number(c.total_neto).toFixed(2)}`
+                ]);
+            });
+
+            doc.autoTable({
+                startY: 34,
+                head: [['Fecha', 'Yape', 'Plin', 'Efectivo', 'Gaseosas', 'Gastos', 'Neto Final']],
+                body: filasTabla,
+                theme: 'striped', headStyles: { fillColor: [79, 70, 229] }, styles: { fontSize: 8, halign: 'center' },
+                columnStyles: { 0: { halign: 'left' }, 6: { halign: 'right', fontStyle: 'bold' } }
+            });
+
+            let finalY = doc.lastAutoTable.finalY + 10;
+            doc.setFont("helvetica", "bold"); doc.setFontSize(10); doc.text("RESUMEN DE TOTALES ACUMULADOS:", 14, finalY);
+            doc.setFont("helvetica", "normal"); doc.setFontSize(9);
+            doc.text(`- Efectivo Neto Total: S/ ${totalEfectivo.toFixed(2)}`, 14, finalY + 6);
+            doc.text(`- Movimientos Digitales (Yape/Plin): S/ ${totalDigital.toFixed(2)}`, 14, finalY + 11);
+            doc.text(`- Total Venta Gaseosas: S/ ${totalGaseosas.toFixed(2)}`, 14, finalY + 16);
+            doc.text(`- Egresos/Gastos Totales: S/ ${totalGastos.toFixed(2)}`, 14, finalY + 21);
+            
+            doc.setFont("helvetica", "bold"); doc.text(`BALANCE TOTAL NETO QUEDANDO: S/ ${totalNeto.toFixed(2)}`, 14, finalY + 28);
+            doc.save(`TripleJ_Reporte_Detallado_${new Date().toISOString().split('T')[0]}.pdf`);
+        });
+
+        // ==========================================
+        //  LÓGICA EXPORTACIÓN PDF 2: FORMATO MINKA (IMAGEN)
+        // ==========================================
+        document.getElementById('btn-pdf-minka').addEventListener('click', () => {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('p', 'mm', 'a4');
+
+            // Determinar mes y año basado en los datos visibles o fecha actual
+            let referenciaFecha = new Date();
+            if(datosFiltradosGlobal.length > 0) { referenciaFecha = new Date(datosFiltradosGlobal[0].fecha + "T00:00:00"); }
+            const nombreMesStr = referenciaFecha.toLocaleDateString('es-ES', { month: 'long' }).toUpperCase();
+            const añoStr = referenciaFecha.getFullYear();
+
+            // 1. Cabecera Principal Estilo Parque Arauco
+            doc.setLineWidth(0.4);
+            doc.rect(14, 12, 12, 12); // Simulación de isotipo cuadro pequeño
+            doc.setFont("helvetica", "bold"); doc.setFontSize(9); doc.text("ParqueArauco", 28, 19);
+            
+            doc.setFontSize(13); doc.text(`REPORTE DE VENTA - ${nombreMesStr} ${añoStr}`, 65, 17);
+
+            // Campos superiores con recuadros
+            doc.setFontSize(8);
+            doc.text("RAZÓN SOCIAL", 38, 26); doc.rect(63, 22, 133, 5);
+            doc.setFont("helvetica", "normal"); doc.text("Lucia Vega Mendieta", 66, 25.5);
+
+            doc.setFont("helvetica", "bold"); doc.text("NOMBRE COMERCIAL", 31, 32); doc.rect(63, 28, 133, 5);
+            doc.setFont("helvetica", "normal"); doc.text("Antojitos Triple 'J'", 66, 31.5);
+
+            doc.setFont("helvetica", "bold"); doc.text("N° DE LOCAL", 42, 38); doc.rect(63, 34, 133, 5);
+
+            // Mapear el mes completo (31 días max) en un diccionario/objeto indexado
+            const ventasPorDiaDiccionario = {};
+            for(let d=1; d<=31; d++) { ventasPorDiaDiccionario[d] = 0; }
+            
+            datosFiltradosGlobal.forEach(c => {
+                const diaNum = new Date(c.fecha + "T00:00:00").getDate();
+                // Ojo: En la hoja de Minka se declara el bruto total ingresado ese día (Yape+Plin+Efectivo+Gaseosas)
+                // Si requieres que solo sea gaseosas o neto, cambias 'total_neto' por 'gaseosas' o el campo que desees. 
+                // Usamos total_neto + gastos para representar la venta bruta real en soles de ese día:
+                const ventaBrutaDiaria = Number(c.total_neto) + Number(c.gastos);
+                ventasPorDiaDiccionario[diaNum] = ventaBrutaDiaria;
+            });
+
+            // Definición de las dos columnas de bloques (Izquierda 1-15, Derecha 16-31)
+            const cabeceraBloques = ["DÍA", "Cantidad de\nBoletas y Facturas", "VENTAS DIA\nen Soles sin IGV"];
+            
+            const cuerpoBloque1 = [];
+            let subtotalBloque1 = 0;
+            for(let i=1; i<=15; i++) {
+                const monto = ventasPorDiaDiccionario[i];
+                subtotalBloque1 += monto;
+                cuerpoBloque1.push([
+                    String(i).padStart(2, '0'), 
+                    "", 
+                    monto > 0 ? Number(monto).toFixed(2) : ""
+                ]);
+            }
+            cuerpoBloque1.push([{ content: 'Sub\nTotal', styles: { fontStyle: 'bold' } }, "", { content: Number(subtotalBloque1).toFixed(2), styles: { fontStyle: 'bold' } }]);
+
+            const cuerpoBloque2 = [];
+            let subtotalBloque2 = 0;
+            // Verificar cuántos días reales tiene el mes en cuestión
+            const añoActualCalculo = referenciaFecha.getFullYear();
+            const mesActualCalculo = referenciaFecha.getMonth();
+            const diasTotalesEnMes = new Date(añoActualCalculo, mesActualCalculo + 1, 0).getDate();
+
+            for(let i=16; i<=31; i++) {
+                if(i <= diasTotalesEnMes) {
+                    const monto = ventasPorDiaDiccionario[i];
+                    subtotalBloque2 += monto;
+                    cuerpoBloque2.push([
+                        String(i), 
+                        "", 
+                        monto > 0 ? Number(monto).toFixed(2) : ""
+                    ]);
+                } else {
+                    // Celdas del 31 vacías si el mes tiene menos días (ej: febrero/abril)
+                    cuerpoBloque2.push([String(i), "", ""]);
+                }
+            }
+            cuerpoBloque2.push([{ content: 'Sub\nTotal', styles: { fontStyle: 'bold' } }, "", { content: Number(subtotalBloque2).toFixed(2), styles: { fontStyle: 'bold' } }]);
+
+            // Renderizado de ambas tablas de forma paralela usando autotable
+            doc.autoTable({
+                head: [cabeceraBloques], body: cuerpoBloque1,
+                startY: 45, margin: { left: 14 }, tableWidth: 88,
+                theme: 'grid', styles: { fontSize: 7.5, cellPadding: 1, textLineWidth: 0.1, lineColor: [0, 0, 0], halign: 'center', font: 'helvetica', textColor: [0,0,0] },
+                headStyles: { fillColor: [240, 240, 240], fontStyle: 'bold', fontSize: 6.5 },
+                columnStyles: { 0: { tableWidth: 12 }, 1: { tableWidth: 38 }, 2: { tableWidth: 38 } }
+            });
+
+            doc.autoTable({
+                head: [cabeceraBloques], body: cuerpoBloque2,
+                startY: 45, margin: { left: 108 }, tableWidth: 88,
+                theme: 'grid', styles: { fontSize: 7.5, cellPadding: 1, textLineWidth: 0.1, lineColor: [0, 0, 0], halign: 'center', font: 'helvetica', textColor: [0,0,0] },
+                headStyles: { fillColor: [240, 240, 240], fontStyle: 'bold', fontSize: 6.5 },
+                columnStyles: { 0: { tableWidth: 12 }, 1: { tableWidth: 38 }, 2: { tableWidth: 38 } }
+            });
+
+            // Fila de Gran Total abajo
+            let tablaY = doc.lastAutoTable.finalY + 6;
+            doc.rect(108, tablaY, 26, 6); doc.setFont("helvetica", "bold"); doc.text("Gran\nTotal", 110, tablaY + 2.5);
+            doc.rect(134, tablaY, 62, 6); doc.setFont("helvetica", "bold"); doc.text(Number(subtotalBloque1 + subtotalBloque2).toFixed(2), 140, tablaY + 4);
+
+            // Bloques de Firmas, Contactos y Textos Legales
+            let pieY = tablaY + 12;
+            doc.rect(14, pieY, 88, 6); doc.setFont("helvetica", "normal"); doc.text("Lucia Vega Mendieta", 17, pieY + 4.2);
+            
+            doc.setFont("helvetica", "bold"); doc.text("Colocar TELEFONO de contacto", 14, pieY + 11);
+            doc.rect(14, pieY + 13, 88, 6); doc.setFont("helvetica", "normal"); doc.text("952310028", 17, pieY + 17.2);
+
+            // Cuadro Informativo de Minka Derecho
+            doc.rect(108, pieY + 13, 88, 14);
+            doc.setFont("helvetica", "bold"); doc.setFontSize(7.5);
+            doc.text("IMPORTANTE: este informe deberá presentar a Minka todos", 111, pieY + 18);
+            doc.text("los días LUNES, el cierre de mes se presenta hasta el", 113, pieY + 22);
+            doc.text("tercer día del mes siguiente", 129, pieY + 26);
+
+            // Declaración Jurada e Isotipo de Firma
+            let firmaY = pieY + 26;
+            doc.setFontSize(7.5); doc.setFont("helvetica", "bold");
+            doc.text("Los datos asignados en el presente documento serán", 14, firmaY);
+            doc.text("considerados como Declaración Jurada.", 24, firmaY + 3.5);
+            doc.text("CONSIDERAR VALORES SIN I.G.V.", 31, firmaY + 7);
+            
+            doc.line(14, firmaY + 18, 102, firmaY + 18);
+            doc.setFontSize(8); doc.text("FIRMA", 52, firmaY + 22);
+
+            doc.save(`Reporte_Minka_${nombreMesStr}_${añoStr}.pdf`);
+        });
     </script>
 </body>
 </html>
