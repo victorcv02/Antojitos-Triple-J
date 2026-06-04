@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Triple J - Cierre y Balance Diario</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .sidebar-transition { transition: transform 0.3s ease-in-out; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="h-full text-slate-800 antialiased font-sans">
+
+    <div id="auth-container" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-md">
+        <div class="w-full max-w-md p-8 mx-4 bg-white rounded-xl shadow-xl border border-slate-100">
+            <div class="flex flex-col items-center mb-8">
+                <div class="p-3 bg-indigo-50 rounded-lg text-indigo-600 mb-3">
+                    <i data-lucide="shield-check" class="w-8 h-8"></i>
+                </div>
+                <h2 class="text-2xl font-semibold text-slate-900 tracking-tight">Triple J - Finanzas</h2>
+                <p class="text-sm text-slate-500 mt-1">Ingresa credenciales para el control de caja</p>
+            </div>
+            
+            <form id="auth-form" class="space-y-5">
+                <div>
+                    <label for="auth-email" class="block text-xs font-medium uppercase tracking-wider text-slate-600 mb-1.5">Correo Electrónico</label>
+                    <input type="email" id="auth-email" required class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors" placeholder="usuario@correo.com">
+                </div>
+                <div>
+                    <label for="auth-password" class="block text-xs font-medium uppercase tracking-wider text-slate-600 mb-1.5">Contraseña</label>
+                    <input type="password" id="auth-password" required class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors" placeholder="••••••••">
+                </div>
+                <button type="submit" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg text-sm transition-colors shadow-sm">
+                    Ingresar al Sistema
+                </button>
+            </form>
+            <div id="auth-error" class="hidden mt-4 p-3 bg-red-50 text-red-600 rounded-lg text-xs border border-red-100 text-center"></div>
+        </div>
+    </div>
+
+    <div id="app-container" class="h-full flex flex-col md:flex-row opacity-30 pointer-events-none transition-opacity duration-300">
+        
+        <aside id="sidebar" class="sidebar-transition fixed inset-y-0 left-0 z-40 w-64 bg-slate-900 text-slate-400 flex flex-col transform -translate-x-full md:translate-x-0 md:static md:h-full">
+            <div class="h-16 flex items-center justify-between px-6 border-b border-slate-800">
+                <div class="flex items-center gap-2.5 text-white">
+                    <div class="p-1.5 bg-indigo-600 rounded-md text-white">
+                        <i data-lucide="wallet" class="w-5 h-5"></i>
+                    </div>
+                    <span class="font-semibold text-lg tracking-tight">Triple J</span>
+                </div>
+                <button id="close-sidebar" class="md:hidden text-slate-400 hover:text-white">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <nav class="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto">
+                <button data-target="mod-registro" class="nav-btn active w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors text-white bg-slate-800">
+                    <i data-lucide="plus-circle" class="w-4 h-4"></i> Cuadrante Diario
+                </button>
+                <button data-target="mod-reportes" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors hover:bg-slate-800 hover:text-white">
+                    <i data-lucide="history" class="w-4 h-4"></i> Historial y Reportes
+                </button>
+            </nav>
+
+            <div class="p-4 border-t border-slate-800 bg-slate-950/40 flex items-center justify-between">
+                <div class="flex items-center gap-2.5 min-w-0">
+                    <div class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-slate-200 text-xs font-semibold">TJ</div>
+                    <div class="truncate">
+                        <p id="user-display-email" class="text-xs text-slate-300 font-medium truncate">usuario@correo.com</p>
+                        <p class="text-[10px] text-slate-500 uppercase tracking-wider">Caja Principal</p>
+                    </div>
+                </div>
+                <button id="btn-logout" class="p-1.5 hover:bg-slate-800 hover:text-red-400 rounded-md transition-colors">
+                    <i data-lucide="log-out" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </aside>
+
+        <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+            
+            <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 md:px-8 shrink-0">
+                <div class="flex items-center gap-4">
+                    <button id="open-sidebar" class="md:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-lg">
+                        <i data-lucide="menu" class="w-5 h-5"></i>
+                    </button>
+                    <h1 id="page-title" class="text-lg font-medium text-slate-900">Cuadrante Diario</h1>
+                </div>
+                <div class="flex items-center gap-4">
+                    <span id="current-date" class="text-xs font-medium text-slate-400 bg-slate-50 px-2.5 py-1 rounded-md border border-slate-100">---</span>
+                </div>
+            </header>
+
+            <main class="flex-1 overflow-y-auto p-4 md:p-8 space-y-6">
+                
+                <section id="mod-registro" class="tab-content active space-y-6">
+                    <div class="max-w-3xl mx-auto bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                        <div class="p-6 border-b border-slate-100 bg-slate-50/50">
+                            <h3 class="text-base font-semibold text-slate-900">Declaración de Ingresos y Egresos</h3>
+                            <p class="text-xs text-slate-500 mt-0.5">Ingresa los totales calculados al cierre del día actual.</p>
+                        </div>
+                        
+                        <form id="form-caja" class="p-6 space-y-6">
+                            <div>
+                                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Fecha del Balance</label>
+                                <input type="date" id="caja-fecha" required class="w-full max-w-xs px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-indigo-500">
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                <div class="space-y-4">
+                                    <h4 class="text-xs font-bold text-indigo-600 uppercase tracking-wide">Ingresos Digitales</h4>
+                                    <div>
+                                        <label class="block text-xs font-medium text-slate-600 mb-1">Monto Total Yape (S/)</label>
+                                        <input type="number" id="caja-yape" step="0.01" min="0" value="0.00" class="input-calculo w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-indigo-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-slate-600 mb-1">Monto Total Plin (S/)</label>
+                                        <input type="number" id="caja-plin" step="0.01" min="0" value="0.00" class="input-calculo w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-indigo-500">
+                                    </div>
+                                </div>
+
+                                <div class="space-y-4">
+                                    <h4 class="text-xs font-bold text-emerald-600 uppercase tracking-wide">Efectivo, Ventas Especiales y Gastos</h4>
+                                    <div>
+                                        <label class="block text-xs font-medium text-slate-600 mb-1">Efectivo Recaudado (S/)</label>
+                                        <input type="number" id="caja-efectivo" step="0.01" min="0" value="0.00" class="input-calculo w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-indigo-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-slate-600 mb-1">Venta de Gaseosas (S/)</label>
+                                        <input type="number" id="caja-gaseosas" step="0.01" min="0" value="0.00" class="input-calculo w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-indigo-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-slate-600 mb-1">Gastos / Egresos del Día (S/)</label>
+                                        <input type="number" id="caja-gastos" step="0.01" min="0" value="0.00" class="input-calculo w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-indigo-500 text-red-600">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-6 p-4 bg-slate-900 text-white rounded-xl flex items-center justify-between">
+                                <div>
+                                    <p class="text-xs text-slate-400 uppercase tracking-wider font-medium">Balance Neto del Día (Dinero Quedando)</p>
+                                    <p class="text-[10px] text-slate-400 mt-0.5">(Yape + Plin + Efectivo + Gaseosas) - Gastos</p>
+                                </div>
+                                <div class="text-right">
+                                    <span id="caja-total-preview" class="text-2xl font-bold tracking-tight text-emerald-400">S/ 0.00</span>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm">
+                                Guardar Cierre de Caja
+                            </button>
+                        </form>
+                    </div>
+                </section>
+
+                <section id="mod-reportes" class="tab-content space-y-6">
+                    
+                    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
+                        <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 items-end">
+                            <div>
+                                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Filtrar por Período</label>
+                                <select id="filtro-periodo" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-indigo-500 text-slate-700 font-medium">
+                                    <option value="todo">Mostrar Todo el Historial</option>
+                                    <option value="hoy">Hoy</option>
+                                    <option value="semana">Esta Semana</option>
+                                    <option value="mes">Este Mes</option>
+                                    <option value="personalizado">Rango Personalizado</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Desde</label>
+                                <input type="date" id="filtro-desde" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-indigo-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Hasta</label>
+                                <input type="date" id="filtro-hasta" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-indigo-500">
+                            </div>
+                            <div>
+                                <button id="btn-pdf-report" class="w-full flex items-center justify-center gap-2 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm h-[38px]">
+                                    <i data-lucide="file-text" class="w-4 h-4"></i> Descargar PDF
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-slate-100">
+                            <div class="p-3 bg-indigo-50/50 border border-indigo-100/50 rounded-lg">
+                                <p class="text-[10px] uppercase font-bold text-slate-400">Total Neto Filtrado</p>
+                                <p id="kpi-total" class="text-base font-bold text-indigo-600 mt-0.5">S/ 0.00</p>
+                            </div>
+                            <div class="p-3 bg-slate-50 rounded-lg">
+                                <p class="text-[10px] uppercase font-bold text-slate-400">Total Efectivo</p>
+                                <p id="kpi-efectivo" class="text-sm font-semibold text-slate-700 mt-0.5">S/ 0.00</p>
+                            </div>
+                            <div class="p-3 bg-slate-50 rounded-lg">
+                                <p class="text-[10px] uppercase font-bold text-slate-400">Total Yape / Plin</p>
+                                <p id="kpi-digital" class="text-sm font-semibold text-slate-700 mt-0.5">S/ 0.00</p>
+                            </div>
+                            <div class="p-3 bg-slate-50 rounded-lg">
+                                <p class="text-[10px] uppercase font-bold text-slate-400">Total Gaseosas</p>
+                                <p id="kpi-gaseosas" class="text-sm font-semibold text-slate-700 mt-0.5">S/ 0.00</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm whitespace-nowrap">
+                                <thead class="bg-slate-50 text-slate-500 text-xs font-medium uppercase tracking-wider border-b border-slate-100">
+                                    <tr>
+                                        <th class="px-6 py-3 text-center w-16">Acción</th>
+                                        <th class="px-6 py-3">Fecha Calendario</th>
+                                        <th class="px-6 py-3 text-center">Gaseosas</th>
+                                        <th class="px-6 py-3 text-center">Gastos</th>
+                                        <th class="px-6 py-3 text-right">Dinero Quedando (Neto)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="reporte-tbody" class="divide-y divide-slate-100 text-slate-700">
+                                    <tr class="hover:bg-slate-50/80 transition-colors">
+                                        <td class="px-6 py-3.5 text-center">
+                                            <button class="p-1 bg-indigo-50 text-indigo-600 rounded hover:bg-indigo-100" title="Ver Detalles">
+                                                <i data-lucide="search" class="w-4 h-4"></i>
+                                            </button>
+                                        </td>
+                                        <td class="px-6 py-3.5 font-medium">Total del día: 03/06/2026</td>
+                                        <td class="px-6 py-3.5 text-center">S/ 45.00</td>
+                                        <td class="px-6 py-3.5 text-center text-red-500">S/ 12.00</td>
+                                        <td class="px-6 py-3.5 text-right font-bold text-emerald-600">S/ 767.20</td>
+                                    </tr>
+                                    <tr class="hover:bg-slate-50/80 transition-colors">
+                                        <td class="px-6 py-3.5 text-center">
+                                            <button class="p-1 bg-indigo-50 text-indigo-600 rounded hover:bg-indigo-100">
+                                                <i data-lucide="search" class="w-4 h-4"></i>
+                                            </button>
+                                        </td>
+                                        <td class="px-6 py-3.5 font-medium">Total del día: 02/06/2026</td>
+                                        <td class="px-6 py-3.5 text-center">S/ 30.00</td>
+                                        <td class="px-6 py-3.5 text-center text-red-500">S/ 0.00</td>
+                                        <td class="px-6 py-3.5 text-right font-bold text-emerald-600">S/ 181.70</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Inicialización de Supabase con tus llaves reales
+        const SUPABASE_URL = "https://qjzhlqliempopuntudyc.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_4zAnWJaBRfljr3zncC84ZA_4LpjScZd";
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        lucide.createIcons();
+
+        // Colocar fecha actual por defecto en el formulario
+        document.getElementById('caja-fecha').value = new Date().toISOString().split('T')[0];
+        
+        document.getElementById('current-date').textContent = new Date().toLocaleDateString('es-ES', { 
+            weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
+        });
+
+        // --- AUTENTICACIÓN REAL CON SUPABASE ---
+        const authContainer = document.getElementById('auth-container');
+        const appContainer = document.getElementById('app-container');
+        const authForm = document.getElementById('auth-form');
+        const authError = document.getElementById('auth-error');
+
+        authForm.addEventListener('submit', async (e) => {
+            e.preventDefault(); 
+            authError.classList.add('hidden'); 
+            
+            const email = document.getElementById('auth-email').value;
+            const password = document.getElementById('auth-password').value;
+
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email: email,
+                password: password,
+            });
+
+            if (error) {
+                authError.textContent = "Error: " + error.message;
+                authError.classList.remove('hidden');
+            } else {
+                authContainer.classList.add('hidden');
+                appContainer.classList.remove('opacity-30', 'pointer-events-none');
+                document.getElementById('user-display-email').textContent = data.user.email;
+                console.log("Sesión iniciada con éxito:", data.user.id);
+            }
+        });
+
+        document.getElementById('btn-logout').addEventListener('click', async () => {
+            await supabase.auth.signOut();
+            authContainer.classList.remove('hidden');
+            appContainer.classList.add('opacity-30', 'pointer-events-none');
+        });
+
+        // --- LÓGICA DE CÁLCULO EN TIEMPO REAL ---
+        const inputsCalculo = document.querySelectorAll('.input-calculo');
+        const previewTotal = document.getElementById('caja-total-preview');
+
+        function calcularBalance() {
+            const yape = parseFloat(document.getElementById('caja-yape').value) || 0;
+            const plin = parseFloat(document.getElementById('caja-plin').value) || 0;
+            const efectivo = parseFloat(document.getElementById('caja-efectivo').value) || 0;
+            const gaseosas = parseFloat(document.getElementById('caja-gaseosas').value) || 0;
+            const gastos = parseFloat(document.getElementById('caja-gastos').value) || 0;
+
+            const totalNeto = (yape + plin + efectivo + gaseosas) - gastos;
+            
+            previewTotal.textContent = `S/ ${totalNeto.toFixed(2)}`;
+            if(totalNeto < 0) {
+                previewTotal.className = "text-2xl font-bold tracking-tight text-red-500";
+            } else {
+                previewTotal.className = "text-2xl font-bold tracking-tight text-emerald-400";
+            }
+        }
+
+        inputsCalculo.forEach(input => input.addEventListener('input', calcularBalance));
+
+        // --- MANEJO DE VISTAS (TABS) ---
+        const navButtons = document.querySelectorAll('.nav-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const pageTitle = document.getElementById('page-title');
+        const sidebar = document.getElementById('sidebar');
+
+        navButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                navButtons.forEach(b => b.classList.remove('active', 'bg-slate-800', 'text-white'));
+                tabContents.forEach(c => c.classList.remove('active'));
+
+                btn.classList.add('active', 'bg-slate-800', 'text-white');
+                const target = btn.getAttribute('data-target');
+                document.getElementById(target).classList.add('active');
+                pageTitle.textContent = btn.innerText.trim();
+                sidebar.classList.add('-translate-x-full');
+            });
+        });
+
+        document.getElementById('open-sidebar').addEventListener('click', () => sidebar.classList.remove('-translate-x-full'));
+        document.getElementById('close-sidebar').addEventListener('click', () => sidebar.classList.add('-translate-x-full'));
+    </script>
+</body>
+</html>
