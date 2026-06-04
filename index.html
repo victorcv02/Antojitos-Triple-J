@@ -173,7 +173,7 @@
                 <!-- 2. HISTORIAL Y REPORTES -->
                 <section id="mod-reportes" class="tab-content space-y-6">
                     <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
-                        <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 items-end">
+                        <div class="grid grid-cols-1 lg:grid-cols-5 gap-4 items-end">
                             <div>
                                 <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Filtrar por Período</label>
                                 <select id="filtro-periodo" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium">
@@ -181,16 +181,21 @@
                                     <option value="hoy">Hoy</option>
                                     <option value="semana">Esta Semana</option>
                                     <option value="mes">Este Mes</option>
-                                    <option value="personalizado">Rango Personalizado</option>
+                                    <option value="dia-especifico">Un Día Específico 📅</option>
+                                    <option value="personalizado">Rango Personalizado 🗓️</option>
                                 </select>
                             </div>
-                            <div>
-                                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Desde</label>
-                                <input type="date" id="filtro-desde" disabled class="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-lg text-sm opacity-60">
+                            <div id="col-dia-especifico" class="hidden">
+                                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Seleccionar Día</label>
+                                <input type="date" id="filtro-dia-unico" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm">
                             </div>
-                            <div>
+                            <div id="col-desde" class="hidden">
+                                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Desde</label>
+                                <input type="date" id="filtro-desde" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm">
+                            </div>
+                            <div id="col-hasta" class="hidden">
                                 <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Hasta</label>
-                                <input type="date" id="filtro-hasta" disabled class="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-lg text-sm opacity-60">
+                                <input type="date" id="filtro-hasta" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm">
                             </div>
                         </div>
 
@@ -224,12 +229,13 @@
                                 <thead class="bg-slate-50 text-slate-500 text-xs font-medium uppercase tracking-wider border-b border-slate-100">
                                     <tr>
                                         <th class="px-6 py-3">Fecha Calendario</th>
-                                        <th class="px-6 py-3 text-center">Yape</th>
-                                        <th class="px-6 py-3 text-center">Plin</th>
-                                        <th class="px-6 py-3 text-center">Efectivo</th>
-                                        <th class="px-6 py-3 text-center">Gaseosas</th>
-                                        <th class="px-6 py-3 text-center">Gastos</th>
-                                        <th class="px-6 py-3 text-right">Dinero Quedando (Neto)</th>
+                                        <th class="px-4 py-3 text-center">Yape</th>
+                                        <th class="px-4 py-3 text-center">Plin</th>
+                                        <th class="px-4 py-3 text-center">Efectivo</th>
+                                        <th class="px-4 py-3 text-center">Gaseosas</th>
+                                        <th class="px-4 py-3 text-center">Gastos</th>
+                                        <th class="px-4 py-3 text-right">Dinero Quedando (Neto)</th>
+                                        <th class="px-6 py-3 text-center">Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody id="reporte-tbody" class="divide-y divide-slate-100 text-slate-700"></tbody>
@@ -304,22 +310,38 @@
             weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
         });
 
-        // --- MANEJO DE FILTROS FECHA (DESDE / HASTA) ---
+        // --- MANEJO DE FILTROS FECHA DInÁMICOS ---
         const filtroPeriodo = document.getElementById('filtro-periodo');
+        const colDiaEspecifico = document.getElementById('col-dia-especifico');
+        const colDesde = document.getElementById('col-desde');
+        const colHasta = document.getElementById('col-hasta');
+        
+        const filtroDiaUnico = document.getElementById('filtro-dia-unico');
         const filtroDesde = document.getElementById('filtro-desde');
         const filtroHasta = document.getElementById('filtro-hasta');
 
         filtroPeriodo.addEventListener('change', () => {
-            if (filtroPeriodo.value === 'personalizado') {
-                filtroDesde.disabled = false; filtroDesde.classList.remove('bg-slate-100', 'opacity-60');
-                filtroHasta.disabled = false; filtroHasta.classList.remove('bg-slate-100', 'opacity-60');
+            const valor = filtroPeriodo.value;
+            
+            // Ocultar todos primero
+            colDiaEspecifico.classList.add('hidden');
+            colDesde.classList.add('hidden');
+            colHasta.classList.add('hidden');
+            
+            if (valor === 'dia-especifico') {
+                colDiaEspecifico.classList.remove('hidden');
+            } else if (valor === 'personalizado') {
+                colDesde.classList.remove('hidden');
+                colHasta.classList.remove('hidden');
             } else {
-                filtroDesde.disabled = true; filtroDesde.classList.add('bg-slate-100', 'opacity-60');
-                filtroHasta.disabled = true; filtroHasta.classList.add('bg-slate-100', 'opacity-60');
-                filtroDesde.value = ""; filtroHasta.value = "";
-                filtrarYAplicarDatos();
+                filtroDiaUnico.value = "";
+                filtroDesde.value = "";
+                filtroHasta.value = "";
             }
+            filtrarYAplicarDatos();
         });
+
+        filtroDiaUnico.addEventListener('input', filtrarYAplicarDatos);
         filtroDesde.addEventListener('input', filtrarYAplicarDatos);
         filtroHasta.addEventListener('input', filtrarYAplicarDatos);
 
@@ -374,7 +396,7 @@
                         <td class="px-4 py-2.5 text-center">S/ ${Number(p.precio_venta).toFixed(2)}</td>
                         <td class="px-4 py-2.5 text-center font-semibold text-emerald-600">S/ ${margen.toFixed(2)}</td>
                         <td class="px-6 py-2.5 text-center">
-                            <button onclick="eliminarProducto(${p.id})" class="text-red-500 hover:text-red-700 font-medium">Eliminar</button>
+                            <button onclick="eliminarProducto(${p.id})" class="text-red-500 hover:text-red-700 font-medium cursor-pointer">Eliminar</button>
                         </td>
                     </tr>
                 `;
@@ -469,16 +491,15 @@
 
             const totalNeto = (yape + plin + efectivo + totalGaseosas) - gastos;
 
-            // Guardar en la tabla principal de Cierres
             const { error: errCierre } = await supabaseApp.from('cierres_caja').upsert({
                 usuario_email: usuarioActualEmail, fecha, yape, plin, efectivo, gaseosas: totalGaseosas, gastos, total_neto: totalNeto
             }, { onConflict: 'fecha' });
 
             if(errCierre) { alert(errCierre.message); return; }
 
-            // Guardar el desglose de gaseosas vendidas
+            // Guardar o refrescar el desglose de gaseosas vendidas
+            await supabaseApp.from('ventas_gaseosas_detalle').delete().eq('fecha', fecha);
             if(arreglosVentasDetalle.length > 0) {
-                await supabaseApp.from('ventas_gaseosas_detalle').delete().eq('fecha', fecha);
                 await supabaseApp.from('ventas_gaseosas_detalle').insert(arreglosVentasDetalle);
             }
 
@@ -512,6 +533,13 @@
             } else if (filtro === 'mes') {
                 const m = new Date().getMonth(); const a = new Date().getFullYear();
                 datosFiltrados = listaCierres.filter(c => { const f = new Date(c.fecha); return f.getMonth() === m && f.getFullYear() === a; });
+            } else if (filtro === 'dia-especifico') {
+                const diaElegido = filtroDiaUnico.value;
+                if (diaElegido) {
+                    datosFiltrados = listaCierres.filter(c => c.fecha === diaElegido);
+                } else {
+                    datosFiltrados = []; // Vacío hasta que escoja un día
+                }
             } else if (filtro === 'personalizado') {
                 const desdeVal = filtroDesde.value;
                 const hastaVal = filtroHasta.value;
@@ -525,7 +553,7 @@
             let sumTotal = 0, sumEfectivo = 0, sumDigital = 0, sumGaseosas = 0, sumGananciaGaseosas = 0;
 
             if (datosFiltrados.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="px-6 py-6 text-center text-slate-400 text-xs">No hay registros para este período.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="8" class="px-6 py-6 text-center text-slate-400 text-xs">No hay registros para este período.</td></tr>`;
             } else {
                 datosFiltrados.forEach(c => {
                     sumTotal += Number(c.total_neto);
@@ -533,7 +561,6 @@
                     sumDigital += (Number(c.yape) + Number(c.plin));
                     sumGaseosas += Number(c.gaseosas);
 
-                    // Calcular ganancia neta histórica de gaseosas de este día específico
                     const detallesDelDia = ventasDetalleMaestro.filter(d => d.fecha === c.fecha);
                     detallesDelDia.forEach(d => {
                         const utilidadUnitaria = d.precio_venta_historico - d.precio_compra_historico;
@@ -543,12 +570,17 @@
                     tbody.innerHTML += `
                         <tr class="hover:bg-slate-50/80 transition-colors text-xs">
                             <td class="px-6 py-3 font-medium">Total del día: ${c.fecha.split('-').reverse().join('/')}</td>
-                            <td class="px-6 py-3 text-center">S/ ${Number(c.yape).toFixed(2)}</td>
-                            <td class="px-6 py-3 text-center">S/ ${Number(c.plin).toFixed(2)}</td>
-                            <td class="px-6 py-3 text-center">S/ ${Number(c.efectivo).toFixed(2)}</td>
-                            <td class="px-6 py-3 text-center">S/ ${Number(c.gaseosas).toFixed(2)}</td>
-                            <td class="px-6 py-3 text-center text-red-500">S/ ${Number(c.gastos).toFixed(2)}</td>
-                            <td class="px-6 py-3 text-right font-bold text-emerald-600">S/ ${Number(c.total_neto).toFixed(2)}</td>
+                            <td class="px-4 py-3 text-center">S/ ${Number(c.yape).toFixed(2)}</td>
+                            <td class="px-4 py-3 text-center">S/ ${Number(c.plin).toFixed(2)}</td>
+                            <td class="px-4 py-3 text-center">S/ ${Number(c.efectivo).toFixed(2)}</td>
+                            <td class="px-4 py-3 text-center">S/ ${Number(c.gaseosas).toFixed(2)}</td>
+                            <td class="px-4 py-3 text-center text-red-500">S/ ${Number(c.gastos).toFixed(2)}</td>
+                            <td class="px-4 py-3 text-right font-bold text-emerald-600">S/ ${Number(c.total_neto).toFixed(2)}</td>
+                            <td class="px-6 py-3 text-center">
+                                <button onclick="eliminarCierreCompleto('${c.fecha}')" class="px-2.5 py-1 bg-red-50 text-red-600 hover:bg-red-100 rounded text-[11px] font-medium transition-colors cursor-pointer">
+                                    Eliminar
+                                </button>
+                            </td>
                         </tr>
                     `;
                 });
@@ -559,6 +591,24 @@
             document.getElementById('kpi-digital').textContent = `S/ ${sumDigital.toFixed(2)}`;
             document.getElementById('kpi-gaseosas').textContent = `S/ ${sumGaseosas.toFixed(2)}`;
             document.getElementById('kpi-ganancia-gaseosas').textContent = `S/ ${sumGananciaGaseosas.toFixed(2)}`;
+        }
+
+        // --- FUNCIÓN PARA ELIMINAR REGISTRO ---
+        async function eliminarCierreCompleto(fechaFormateada) {
+            const fechaBonita = fechaFormateada.split('-').reverse().join('/');
+            if (confirm(`¿Estás completamente seguro de que deseas eliminar TODO el registro del día ${fechaBonita}?\nEsta acción no se puede deshacer.`)) {
+                
+                // 1. Eliminar el cierre principal (la relación 'cascade' en SQL limpiará ventas_gaseosas_detalle automáticamente si usas referencias, pero lo hacemos explícito por seguridad)
+                await supabaseApp.from('ventas_gaseosas_detalle').delete().eq('fecha', fechaFormateada);
+                const { error } = await supabaseApp.from('cierres_caja').delete().eq('fecha', fechaFormateada);
+
+                if (error) {
+                    alert("Error al eliminar: " + error.message);
+                } else {
+                    alert(`El registro del día ${fechaBonita} fue eliminado con éxito.`);
+                    await cargarHistorialReal();
+                }
+            }
         }
 
         // --- NAVEGACIÓN TABS ---
