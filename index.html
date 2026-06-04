@@ -257,10 +257,10 @@
     </div>
 
     <script>
-        // Inicialización de Supabase con tus llaves reales
+        // Inicialización corregida de Supabase con tus llaves reales
         const SUPABASE_URL = "https://qjzhlqliempopuntudyc.supabase.co";
         const SUPABASE_KEY = "sb_publishable_4zAnWJaBRfljr3zncC84ZA_4LpjScZd";
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const supabaseApp = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         lucide.createIcons();
 
@@ -284,7 +284,7 @@
             const email = document.getElementById('auth-email').value;
             const password = document.getElementById('auth-password').value;
 
-            const { data, error } = await supabase.auth.signInWithPassword({
+            const { data, error } = await supabaseApp.auth.signInWithPassword({
                 email: email,
                 password: password,
             });
@@ -301,7 +301,7 @@
         });
 
         document.getElementById('btn-logout').addEventListener('click', async () => {
-            await supabase.auth.signOut();
+            await supabaseApp.auth.signOut();
             authContainer.classList.remove('hidden');
             appContainer.classList.add('opacity-30', 'pointer-events-none');
         });
