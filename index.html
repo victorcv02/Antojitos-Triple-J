@@ -19,6 +19,7 @@
 </head>
 <body class="h-full text-slate-800 antialiased font-sans">
 
+    <!-- CONTENEDOR LOGIN -->
     <div id="auth-container" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-md">
         <div class="w-full max-w-md p-8 mx-4 bg-white rounded-xl shadow-xl border border-slate-100">
             <div class="flex flex-col items-center mb-8">
@@ -46,8 +47,10 @@
         </div>
     </div>
 
+    <!-- APP PRINCIPAL -->
     <div id="app-container" class="h-full flex flex-col md:flex-row opacity-30 pointer-events-none transition-opacity duration-300">
         
+        <!-- SIDEBAR BARRA LATERAL -->
         <aside id="sidebar" class="sidebar-transition fixed inset-y-0 left-0 z-40 w-64 bg-slate-900 text-slate-400 flex flex-col transform -translate-x-full md:translate-x-0 md:static md:h-full">
             <div class="h-16 flex items-center justify-between px-6 border-b border-slate-800">
                 <div class="flex items-center gap-2.5 text-white">
@@ -56,19 +59,19 @@
                     </div>
                     <span class="font-semibold text-lg tracking-tight">Triple J</span>
                 </div>
-                <button id="close-sidebar" class="md:hidden text-slate-400 hover:text-white">
+                <button id="close-sidebar" class="md:hidden text-slate-400 hover:text-white p-1 cursor-pointer">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
 
             <nav class="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto">
-                <button data-target="mod-registro" class="nav-btn active w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors text-white bg-slate-800">
+                <button data-target="mod-registro" class="nav-btn active w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors text-white bg-slate-800 cursor-pointer">
                     <i data-lucide="plus-circle" class="w-4 h-4"></i> Cuadrante Diario
                 </button>
-                <button data-target="mod-reportes" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors hover:bg-slate-800 hover:text-white">
+                <button data-target="mod-reportes" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors hover:bg-slate-800 hover:text-white cursor-pointer">
                     <i data-lucide="history" class="w-4 h-4"></i> Historial y Reportes
                 </button>
-                <button data-target="mod-gaseosas" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors hover:bg-slate-800 hover:text-white">
+                <button data-target="mod-gaseosas" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors hover:bg-slate-800 hover:text-white cursor-pointer">
                     <i data-lucide="beer" class="w-4 h-4"></i> Gestión de Gaseosas
                 </button>
             </nav>
@@ -81,17 +84,18 @@
                         <p class="text-[10px] text-slate-500 uppercase tracking-wider">Caja Principal</p>
                     </div>
                 </div>
-                <button id="btn-logout" class="p-1.5 hover:bg-slate-800 hover:text-red-400 rounded-md transition-colors">
+                <button id="btn-logout" class="p-1.5 hover:bg-slate-800 hover:text-red-400 rounded-md transition-colors cursor-pointer">
                     <i data-lucide="log-out" class="w-4 h-4"></i>
                 </button>
             </div>
         </aside>
 
+        <!-- CONTENIDO DERECHO -->
         <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
             
             <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 md:px-8 shrink-0">
                 <div class="flex items-center gap-4">
-                    <button id="open-sidebar" class="md:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-lg">
+                    <button id="open-sidebar" class="md:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-lg cursor-pointer">
                         <i data-lucide="menu" class="w-5 h-5"></i>
                     </button>
                     <h1 id="page-title" class="text-lg font-medium text-slate-900">Cuadrante Diario</h1>
@@ -145,7 +149,7 @@
                                 <div class="space-y-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
                                     <h4 class="text-xs font-bold text-amber-600 uppercase tracking-wide">Unidades Vendidas (Gaseosas)</h4>
                                     <div id="contenedor-ventas-gaseosas" class="space-y-3 max-h-64 overflow-y-auto pr-1">
-                                        <!-- Se autogenera dinámicamente -->
+                                        <!-- Dinámico -->
                                     </div>
                                     <div class="pt-2 border-t border-slate-200 text-right">
                                         <p class="text-[11px] text-slate-500 font-medium">Subtotal Gaseosas:</p>
@@ -163,7 +167,7 @@
                                 </div>
                             </div>
 
-                            <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm">
+                            <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm cursor-pointer">
                                 Guardar Cierre de Caja
                             </button>
                         </form>
@@ -244,7 +248,7 @@
                     </div>
                 </section>
 
-                <!-- 3. GESTIÓN DE PRODUCTOS / GASEOSAS -->
+                <!-- 3. GESTIÓN DE PRODUCTOS / GASEOSAS + INVENTARIO -->
                 <section id="mod-gaseosas" class="tab-content space-y-6">
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm h-fit">
@@ -254,15 +258,21 @@
                                     <label class="block text-xs font-medium text-slate-600 mb-1">Nombre de la Gaseosa</label>
                                     <input type="text" id="prod-nombre" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm" placeholder="Ej: Fanta Piña">
                                 </div>
-                                <div>
-                                    <label class="block text-xs font-medium text-slate-600 mb-1">Precio de Compra (Costo S/)</label>
-                                    <input type="number" id="prod-compra" step="0.01" min="0" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm" placeholder="0.00">
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs font-medium text-slate-600 mb-1">Costo (S/)</label>
+                                        <input type="number" id="prod-compra" step="0.01" min="0" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm" placeholder="0.00">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-slate-600 mb-1">Público (S/)</label>
+                                        <input type="number" id="prod-venta" step="0.01" min="0" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm" placeholder="0.00">
+                                    </div>
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-medium text-slate-600 mb-1">Precio de Venta (Público S/)</label>
-                                    <input type="number" id="prod-venta" step="0.01" min="0" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm" placeholder="0.00">
+                                    <label class="block text-xs font-medium text-slate-600 mb-1">Stock Inicial (Unidades)</label>
+                                    <input type="number" id="prod-stock" min="0" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm" value="0">
                                 </div>
-                                <button type="submit" class="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium rounded-lg transition-colors">
+                                <button type="submit" class="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium rounded-lg transition-colors cursor-pointer">
                                     Registrar Producto
                                 </button>
                             </form>
@@ -277,9 +287,10 @@
                                     <thead class="bg-slate-50 text-slate-500 text-xs font-medium border-b border-slate-100">
                                         <tr>
                                             <th class="px-6 py-2.5">Producto</th>
+                                            <th class="px-4 py-2.5 text-center">Stock Actual</th>
                                             <th class="px-4 py-2.5 text-center">Costo (S/)</th>
                                             <th class="px-4 py-2.5 text-center">Venta (S/)</th>
-                                            <th class="px-4 py-2.5 text-center">Margen / Utilidad</th>
+                                            <th class="px-4 py-2.5 text-center">Margen</th>
                                             <th class="px-6 py-2.5 text-center">Acciones</th>
                                         </tr>
                                     </thead>
@@ -310,34 +321,51 @@
             weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
         });
 
-        // --- MANEJO DE FILTROS FECHA DInÁMICOS ---
+        // --- SOLUCIÓN PUNTO 1: CONTROL DE MENÚ DESPLEGABLE MÓVIL ---
+        const sidebar = document.getElementById('sidebar');
+        const openSidebarBtn = document.getElementById('open-sidebar');
+        const closeSidebarBtn = document.getElementById('close-sidebar');
+
+        openSidebarBtn.addEventListener('click', () => {
+            sidebar.classList.remove('-translate-x-full');
+        });
+
+        closeSidebarBtn.addEventListener('click', () => {
+            sidebar.classList.add('-translate-x-full');
+        });
+
+        // Ocultar menú móvil tras pulsar una opción
+        const navButtons = document.querySelectorAll('.nav-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+        navButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                navButtons.forEach(b => b.classList.remove('active', 'bg-slate-800', 'text-white'));
+                tabContents.forEach(c => c.classList.remove('active'));
+                btn.classList.add('active', 'bg-slate-800', 'text-white');
+                document.getElementById(btn.getAttribute('data-target')).classList.add('active');
+                document.getElementById('page-title').textContent = btn.innerText.trim();
+                
+                // Forzar cierre en celulares
+                sidebar.classList.add('-translate-x-full');
+            });
+        });
+
+        // --- FILTROS FECHA ---
         const filtroPeriodo = document.getElementById('filtro-periodo');
         const colDiaEspecifico = document.getElementById('col-dia-especifico');
         const colDesde = document.getElementById('col-desde');
         const colHasta = document.getElementById('col-hasta');
-        
         const filtroDiaUnico = document.getElementById('filtro-dia-unico');
         const filtroDesde = document.getElementById('filtro-desde');
         const filtroHasta = document.getElementById('filtro-hasta');
 
         filtroPeriodo.addEventListener('change', () => {
             const valor = filtroPeriodo.value;
-            
-            // Ocultar todos primero
             colDiaEspecifico.classList.add('hidden');
             colDesde.classList.add('hidden');
             colHasta.classList.add('hidden');
-            
-            if (valor === 'dia-especifico') {
-                colDiaEspecifico.classList.remove('hidden');
-            } else if (valor === 'personalizado') {
-                colDesde.classList.remove('hidden');
-                colHasta.classList.remove('hidden');
-            } else {
-                filtroDiaUnico.value = "";
-                filtroDesde.value = "";
-                filtroHasta.value = "";
-            }
+            if (valor === 'dia-especifico') colDiaEspecifico.classList.remove('hidden');
+            else if (valor === 'personalizado') { colDesde.classList.remove('hidden'); colHasta.classList.remove('hidden'); }
             filtrarYAplicarDatos();
         });
 
@@ -372,7 +400,7 @@
 
         document.getElementById('btn-logout').addEventListener('click', async () => {
             await supabaseApp.auth.signOut();
-            authContainer.classList.remove('hidden');
+            authContainer.classList.add('hidden');
             appContainer.classList.add('opacity-30', 'pointer-events-none');
         });
 
@@ -384,18 +412,23 @@
             renderizarFormularioVentaGaseosas();
         }
 
+        // --- SOLUCIÓN PUNTO 2: TABLA CON EDICIÓN EN LÍNEA + STOCK (PUNTO 3) ---
         function renderizarSeccionInventario() {
             const tbody = document.getElementById('inventario-tbody');
             tbody.innerHTML = "";
             listaProductos.forEach(p => {
                 const margen = p.precio_venta - p.precio_compra;
+                const stockActual = p.stock !== undefined && p.stock !== null ? p.stock : 0;
+                
                 tbody.innerHTML += `
-                    <tr class="text-xs">
-                        <td class="px-6 py-2.5 font-medium text-slate-900">${p.nombre}</td>
-                        <td class="px-4 py-2.5 text-center">S/ ${Number(p.precio_compra).toFixed(2)}</td>
-                        <td class="px-4 py-2.5 text-center">S/ ${Number(p.precio_venta).toFixed(2)}</td>
+                    <tr class="text-xs" id="fila-producto-${p.id}">
+                        <td class="px-6 py-2.5 font-medium text-slate-900 data-campo="nombre">${p.nombre}</td>
+                        <td class="px-4 py-2.5 text-center font-bold ${stockActual <= 3 ? 'text-red-600 bg-red-50' : 'text-slate-700'}" data-campo="stock">${stockActual} u.</td>
+                        <td class="px-4 py-2.5 text-center" data-campo="compra">S/ ${Number(p.precio_compra).toFixed(2)}</td>
+                        <td class="px-4 py-2.5 text-center" data-campo="venta">S/ ${Number(p.precio_venta).toFixed(2)}</td>
                         <td class="px-4 py-2.5 text-center font-semibold text-emerald-600">S/ ${margen.toFixed(2)}</td>
-                        <td class="px-6 py-2.5 text-center">
+                        <td class="px-6 py-2.5 text-center space-x-3">
+                            <button onclick="activarEdicionProducto(${p.id})" class="text-indigo-600 hover:text-indigo-900 font-medium cursor-pointer">Editar</button>
                             <button onclick="eliminarProducto(${p.id})" class="text-red-500 hover:text-red-700 font-medium cursor-pointer">Eliminar</button>
                         </td>
                     </tr>
@@ -403,14 +436,51 @@
             });
         }
 
+        function activarEdicionProducto(id) {
+            const prod = listaProductos.find(p => p.id === id);
+            const fila = document.getElementById(`fila-producto-${id}`);
+            
+            fila.innerHTML = `
+                <td class="px-6 py-2"><input type="text" id="edit-nombre-${id}" class="w-full px-2 py-1 border rounded text-xs" value="${prod.nombre}"></td>
+                <td class="px-4 py-2 text-center"><input type="number" id="edit-stock-${id}" class="w-16 px-2 py-1 border rounded text-center text-xs" value="${prod.stock || 0}"></td>
+                <td class="px-4 py-2 text-center"><input type="number" step="0.01" id="edit-compra-${id}" class="w-20 px-2 py-1 border rounded text-center text-xs" value="${prod.precio_compra}"></td>
+                <td class="px-4 py-2 text-center"><input type="number" step="0.01" id="edit-venta-${id}" class="w-20 px-2 py-1 border rounded text-center text-xs" value="${prod.precio_venta}"></td>
+                <td class="px-4 py-2 text-center text-slate-400">-</td>
+                <td class="px-6 py-2 text-center space-x-2">
+                    <button onclick="guardarEdicionProducto(${id})" class="px-2 py-1 bg-emerald-600 text-white rounded text-[11px] font-medium cursor-pointer">Guardar</button>
+                    <button onclick="renderizarSeccionInventario()" class="px-2 py-1 bg-slate-200 text-slate-700 rounded text-[11px] font-medium cursor-pointer">X</button>
+                </td>
+            `;
+        }
+
+        async function guardarEdicionProducto(id) {
+            const nombre = document.getElementById(`edit-nombre-${id}`).value;
+            const stock = parseInt(document.getElementById(`edit-stock-${id}`).value) || 0;
+            const precio_compra = parseFloat(document.getElementById(`edit-compra-${id}`).value) || 0;
+            const precio_venta = parseFloat(document.getElementById(`edit-venta-${id}`).value) || 0;
+
+            const { error } = await supabaseApp.from('productos').update({
+                nombre, stock, precio_compra, precio_venta
+            }).eq('id', id);
+
+            if (error) alert("Error al actualizar: " + error.message);
+            else {
+                await cargarProductosMaestros();
+            }
+        }
+
         function renderizarFormularioVentaGaseosas() {
             const contenedor = document.getElementById('contenedor-ventas-gaseosas');
             contenedor.innerHTML = "";
             listaProductos.forEach(p => {
+                const stockActual = p.stock || 0;
                 contenedor.innerHTML += `
-                    <div class="flex items-center justify-between text-xs bg-white p-2 rounded-lg border border-slate-100">
-                        <span class="font-medium text-slate-700">${p.nombre} <span class="text-slate-400 font-normal">(S/ ${Number(p.precio_venta).toFixed(2)})</span></span>
-                        <input type="number" data-id="${p.id}" data-venta="${p.precio_venta}" min="0" class="input-gaseosa-unidad w-16 px-2 py-1 bg-slate-50 border border-slate-200 rounded text-center" placeholder="0">
+                    <div class="flex flex-col text-xs bg-white p-2 rounded-lg border border-slate-100 space-y-1">
+                        <div class="flex items-center justify-between">
+                            <span class="font-medium text-slate-700">${p.nombre} <span class="text-slate-400 font-normal">(S/ ${Number(p.precio_venta).toFixed(2)})</span></span>
+                            <input type="number" data-id="${p.id}" data-venta="${p.precio_venta}" data-stock="${stockActual}" min="0" max="${stockActual}" class="input-gaseosa-unidad w-16 px-2 py-1 bg-slate-50 border border-slate-200 rounded text-center" placeholder="0">
+                        </div>
+                        <span class="text-[10px] text-right text-slate-400">Stock disponible: ${stockActual} u.</span>
                     </div>
                 `;
             });
@@ -423,14 +493,16 @@
             const nombre = document.getElementById('prod-nombre').value;
             const precio_compra = parseFloat(document.getElementById('prod-compra').value) || 0;
             const precio_venta = parseFloat(document.getElementById('prod-venta').value) || 0;
+            const stock = parseInt(document.getElementById('prod-stock').value) || 0;
 
-            await supabaseApp.from('productos').insert({ nombre, precio_compra, precio_venta });
+            await supabaseApp.from('productos').insert({ nombre, precio_compra, precio_venta, stock });
             document.getElementById('form-nuevo-producto').reset();
+            document.getElementById('prod-stock').value = "0";
             await cargarProductosMaestros();
         });
 
         async function eliminarProducto(id) {
-            if(confirm("¿Seguro que deseas eliminar este producto?")) {
+            if(confirm("¿Seguro que deseas eliminar este producto del maestro?")) {
                 await supabaseApp.from('productos').delete().eq('id', id);
                 await cargarProductosMaestros();
             }
@@ -460,7 +532,7 @@
         }
         document.querySelectorAll('.input-calculo').forEach(i => i.addEventListener('input', calcularBalance));
 
-        // --- COMPORTAMIENTO GUARDAR CIERRE ---
+        // --- GUARDAR CIERRE + DISMINUCIÓN DE INVENTARIO (PUNTO 3) ---
         document.getElementById('form-caja').addEventListener('submit', async (e) => {
             e.preventDefault();
             const fecha = document.getElementById('caja-fecha').value;
@@ -471,12 +543,23 @@
 
             let totalGaseosas = 0;
             let arreglosVentasDetalle = [];
+            let actualizacionesStockPromesas = [];
+
+            let stockInsuficiente = false;
 
             document.querySelectorAll('.input-gaseosa-unidad').forEach(input => {
                 const cantidad = parseInt(input.value) || 0;
                 if (cantidad > 0) {
                     const prodId = input.dataset.id;
+                    const stockMaximo = parseInt(input.dataset.stock) || 0;
                     const prodMaster = listaProductos.find(p => p.id == prodId);
+
+                    if (cantidad > stockMaximo) {
+                        alert(`No puedes vender ${cantidad} unidades de ${prodMaster.nombre}, solo te quedan ${stockMaximo} en stock.`);
+                        stockInsuficiente = true;
+                        return;
+                    }
+
                     totalGaseosas += (cantidad * prodMaster.precio_venta);
 
                     arreglosVentasDetalle.push({
@@ -486,35 +569,50 @@
                         precio_compra_historico: prodMaster.precio_compra,
                         precio_venta_historico: prodMaster.precio_venta
                     });
+
+                    // Calcular nuevo stock que quedará en base de datos
+                    const nuevoStock = stockMaximo - cantidad;
+                    actualizacionesStockPromesas.push(
+                        supabaseApp.from('productos').update({ stock: nuevoStock }).eq('id', prodId)
+                    );
                 }
             });
 
+            if (stockInsuficiente) return;
+
             const totalNeto = (yape + plin + efectivo + totalGaseosas) - gastos;
 
+            // Registrar cierre
             const { error: errCierre } = await supabaseApp.from('cierres_caja').upsert({
                 usuario_email: usuarioActualEmail, fecha, yape, plin, efectivo, gaseosas: totalGaseosas, gastos, total_neto: totalNeto
             }, { onConflict: 'fecha' });
 
             if(errCierre) { alert(errCierre.message); return; }
 
-            // Guardar o refrescar el desglose de gaseosas vendidas
+            // Limpiar y guardar desglose antiguo
             await supabaseApp.from('ventas_gaseosas_detalle').delete().eq('fecha', fecha);
             if(arreglosVentasDetalle.length > 0) {
                 await supabaseApp.from('ventas_gaseosas_detalle').insert(arreglosVentasDetalle);
             }
 
-            alert("¡Cierre diario guardado con éxito!");
+            // --- SOLUCIÓN PUNTO 3: Descontar el stock real de los productos ---
+            if(actualizacionesStockPromesas.length > 0) {
+                await Promise.all(actualizacionesStockPromesas);
+            }
+
+            alert("¡Cierre diario guardado y stock actualizado en el almacén!");
             document.getElementById('form-caja').reset();
             document.getElementById('caja-fecha').value = new Date().toISOString().split('T')[0];
-            calcularBalance();
+            
+            await cargarProductosMaestros(); // Recargar tablas y stocks frescos
             await cargarHistorialReal();
+            calcularBalance();
         });
 
-        // --- LEER HISTORIAL Y FILTRADO ---
+        // --- LEER HISTORIAL ---
         async function cargarHistorialReal() {
             const { data: dataCierres } = await supabaseApp.from('cierres_caja').select('*').order('fecha', { ascending: false });
             const { data: dataDetalles } = await supabaseApp.from('ventas_gaseosas_detalle').select('*');
-            
             listaCierres = dataCierres || [];
             ventasDetalleMaestro = dataDetalles || [];
             filtrarYAplicarDatos();
@@ -525,51 +623,27 @@
             const hoyStr = new Date().toISOString().split('T')[0];
             let datosFiltrados = listaCierres;
 
-            if (filtro === 'hoy') {
-                datosFiltrados = listaCierres.filter(c => c.fecha === hoyStr);
-            } else if (filtro === 'semana') {
-                const limite = new Date(); limite.setDate(limite.getDate() - 7);
-                datosFiltrados = listaCierres.filter(c => new Date(c.fecha) >= limite);
-            } else if (filtro === 'mes') {
-                const m = new Date().getMonth(); const a = new Date().getFullYear();
-                datosFiltrados = listaCierres.filter(c => { const f = new Date(c.fecha); return f.getMonth() === m && f.getFullYear() === a; });
-            } else if (filtro === 'dia-especifico') {
-                const diaElegido = filtroDiaUnico.value;
-                if (diaElegido) {
-                    datosFiltrados = listaCierres.filter(c => c.fecha === diaElegido);
-                } else {
-                    datosFiltrados = []; // Vacío hasta que escoja un día
-                }
-            } else if (filtro === 'personalizado') {
-                const desdeVal = filtroDesde.value;
-                const hastaVal = filtroHasta.value;
-                if (desdeVal) datosFiltrados = datosFiltrados.filter(c => c.fecha >= desdeVal);
-                if (hastaVal) datosFiltrados = datosFiltrados.filter(c => c.fecha <= hastaVal);
-            }
+            if (filtro === 'hoy') datosFiltrados = listaCierres.filter(c => c.fecha === hoyStr);
+            else if (filtro === 'semana') { const lim = new Date(); lim.setDate(lim.getDate() - 7); datosFiltrados = listaCierres.filter(c => new Date(c.fecha) >= lim); }
+            else if (filtro === 'mes') { const m = new Date().getMonth(); const a = new Date().getFullYear(); datosFiltrados = listaCierres.filter(c => { const f = new Date(c.fecha); return f.getMonth() === m && f.getFullYear() === a; }); }
+            else if (filtro === 'dia-especifico') { const d = filtroDiaUnico.value; datosFiltrados = d ? listaCierres.filter(c => c.fecha === d) : []; }
+            else if (filtro === 'personalizado') { const desdeVal = filtroDesde.value; const hastaVal = filtroHasta.value; if (desdeVal) datosFiltrados = datosFiltrados.filter(c => c.fecha >= desdeVal); if (hastaVal) datosFiltrados = datosFiltrados.filter(c => c.fecha <= hastaVal); }
 
             const tbody = document.getElementById('reporte-tbody');
             tbody.innerHTML = "";
-
             let sumTotal = 0, sumEfectivo = 0, sumDigital = 0, sumGaseosas = 0, sumGananciaGaseosas = 0;
 
             if (datosFiltrados.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" class="px-6 py-6 text-center text-slate-400 text-xs">No hay registros para este período.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="8" class="px-6 py-6 text-center text-slate-400 text-xs">No hay registros.</td></tr>`;
             } else {
                 datosFiltrados.forEach(c => {
-                    sumTotal += Number(c.total_neto);
-                    sumEfectivo += Number(c.efectivo);
-                    sumDigital += (Number(c.yape) + Number(c.plin));
-                    sumGaseosas += Number(c.gaseosas);
-
-                    const detallesDelDia = ventasDetalleMaestro.filter(d => d.fecha === c.fecha);
-                    detallesDelDia.forEach(d => {
-                        const utilidadUnitaria = d.precio_venta_historico - d.precio_compra_historico;
-                        sumGananciaGaseosas += (d.cantidad * utilidadUnitaria);
-                    });
+                    sumTotal += Number(c.total_neto); sumEfectivo += Number(c.efectivo); sumDigital += (Number(c.yape) + Number(c.plin)); sumGaseosas += Number(c.gaseosas);
+                    const det = ventasDetalleMaestro.filter(d => d.fecha === c.fecha);
+                    det.forEach(d => { sumGananciaGaseosas += (d.cantidad * (d.precio_venta_historico - d.precio_compra_historico)); });
 
                     tbody.innerHTML += `
-                        <tr class="hover:bg-slate-50/80 transition-colors text-xs">
-                            <td class="px-6 py-3 font-medium">Total del día: ${c.fecha.split('-').reverse().join('/')}</td>
+                        <tr class="hover:bg-slate-50/80 text-xs">
+                            <td class="px-6 py-3 font-medium">${c.fecha.split('-').reverse().join('/')}</td>
                             <td class="px-4 py-3 text-center">S/ ${Number(c.yape).toFixed(2)}</td>
                             <td class="px-4 py-3 text-center">S/ ${Number(c.plin).toFixed(2)}</td>
                             <td class="px-4 py-3 text-center">S/ ${Number(c.efectivo).toFixed(2)}</td>
@@ -577,15 +651,12 @@
                             <td class="px-4 py-3 text-center text-red-500">S/ ${Number(c.gastos).toFixed(2)}</td>
                             <td class="px-4 py-3 text-right font-bold text-emerald-600">S/ ${Number(c.total_neto).toFixed(2)}</td>
                             <td class="px-6 py-3 text-center">
-                                <button onclick="eliminarCierreCompleto('${c.fecha}')" class="px-2.5 py-1 bg-red-50 text-red-600 hover:bg-red-100 rounded text-[11px] font-medium transition-colors cursor-pointer">
-                                    Eliminar
-                                </button>
+                                <button onclick="eliminarCierreCompleto('${c.fecha}')" class="px-2 py-1 bg-red-50 text-red-600 hover:bg-red-100 rounded text-[11px] font-medium cursor-pointer">Eliminar</button>
                             </td>
                         </tr>
                     `;
                 });
             }
-
             document.getElementById('kpi-total').textContent = `S/ ${sumTotal.toFixed(2)}`;
             document.getElementById('kpi-efectivo').textContent = `S/ ${sumEfectivo.toFixed(2)}`;
             document.getElementById('kpi-digital').textContent = `S/ ${sumDigital.toFixed(2)}`;
@@ -593,36 +664,13 @@
             document.getElementById('kpi-ganancia-gaseosas').textContent = `S/ ${sumGananciaGaseosas.toFixed(2)}`;
         }
 
-        // --- FUNCIÓN PARA ELIMINAR REGISTRO ---
         async function eliminarCierreCompleto(fechaFormateada) {
-            const fechaBonita = fechaFormateada.split('-').reverse().join('/');
-            if (confirm(`¿Estás completamente seguro de que deseas eliminar TODO el registro del día ${fechaBonita}?\nEsta acción no se puede deshacer.`)) {
-                
-                // 1. Eliminar el cierre principal (la relación 'cascade' en SQL limpiará ventas_gaseosas_detalle automáticamente si usas referencias, pero lo hacemos explícito por seguridad)
+            if (confirm(`¿Eliminar registro del día ${fechaFormateada.split('-').reverse().join('/')}?`)) {
                 await supabaseApp.from('ventas_gaseosas_detalle').delete().eq('fecha', fechaFormateada);
-                const { error } = await supabaseApp.from('cierres_caja').delete().eq('fecha', fechaFormateada);
-
-                if (error) {
-                    alert("Error al eliminar: " + error.message);
-                } else {
-                    alert(`El registro del día ${fechaBonita} fue eliminado con éxito.`);
-                    await cargarHistorialReal();
-                }
+                await supabaseApp.from('cierres_caja').delete().eq('fecha', fechaFormateada);
+                await cargarHistorialReal();
             }
         }
-
-        // --- NAVEGACIÓN TABS ---
-        const navButtons = document.querySelectorAll('.nav-btn');
-        const tabContents = document.querySelectorAll('.tab-content');
-        navButtons.forEach(btn => {
-            btn.addEventListener('click', () => {
-                navButtons.forEach(b => b.classList.remove('active', 'bg-slate-800', 'text-white'));
-                tabContents.forEach(c => c.classList.remove('active'));
-                btn.classList.add('active', 'bg-slate-800', 'text-white');
-                document.getElementById(btn.getAttribute('data-target')).classList.add('active');
-                document.getElementById('page-title').textContent = btn.innerText.trim();
-            });
-        });
     </script>
 </body>
 </html>
