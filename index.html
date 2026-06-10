@@ -7,7 +7,6 @@
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Librerías para Generación de PDFs -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
     <style>
@@ -22,7 +21,6 @@
 </head>
 <body class="h-full text-slate-800 antialiased font-sans">
 
-    <!-- CONTENEDOR LOGIN -->
     <div id="auth-container" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-md">
         <div class="w-full max-w-md p-8 mx-4 bg-white rounded-xl shadow-xl border border-slate-100">
             <div class="flex flex-col items-center mb-8">
@@ -42,7 +40,7 @@
                     <label class="block text-xs font-medium uppercase tracking-wider text-slate-600 mb-1.5">Contraseña</label>
                     <input type="password" id="auth-password" required class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-indigo-500" placeholder="••••••••">
                 </div>
-                <button type="submit" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg text-sm transition-colors shadow-sm">
+                <button type="submit" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg text-sm transition-colors shadow-sm cursor-pointer">
                     Ingresar al Sistema
                 </button>
             </form>
@@ -50,10 +48,8 @@
         </div>
     </div>
 
-    <!-- APP PRINCIPAL -->
     <div id="app-container" class="h-full flex flex-col md:flex-row opacity-30 pointer-events-none transition-opacity duration-300">
         
-        <!-- SIDEBAR BARRA LATERAL -->
         <aside id="sidebar" class="sidebar-transition fixed inset-y-0 left-0 z-40 w-64 bg-slate-900 text-slate-400 flex flex-col transform -translate-x-full md:translate-x-0 md:static md:h-full">
             <div class="h-16 flex items-center justify-between px-6 border-b border-slate-800">
                 <div class="flex items-center gap-2.5 text-white">
@@ -93,7 +89,6 @@
             </div>
         </aside>
 
-        <!-- CONTENIDO DERECHO -->
         <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
             
             <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 md:px-8 shrink-0">
@@ -110,7 +105,6 @@
 
             <main class="flex-1 overflow-y-auto p-4 md:p-8 space-y-6">
                 
-                <!-- 1. REGISTRO DIARIO -->
                 <section id="mod-registro" class="tab-content active space-y-6">
                     <div class="max-w-4xl mx-auto bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
                         <div class="p-6 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
@@ -153,8 +147,7 @@
                                 <div class="space-y-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
                                     <h4 class="text-xs font-bold text-amber-600 uppercase tracking-wide">Unidades Vendidas (Gaseosas)</h4>
                                     <div id="contenedor-ventas-gaseosas" class="space-y-3 max-h-64 overflow-y-auto pr-1">
-                                        <!-- Dinámico -->
-                                    </div>
+                                        </div>
                                     <div class="pt-2 border-t border-slate-200 text-right">
                                         <p class="text-[11px] text-slate-500 font-medium">Subtotal Gaseosas:</p>
                                         <p id="subtotal-gaseosas-preview" class="text-sm font-bold text-slate-800">S/ 0.00</p>
@@ -183,7 +176,6 @@
                     </div>
                 </section>
 
-                <!-- 2. HISTORIAL Y REPORTES -->
                 <section id="mod-reportes" class="tab-content space-y-6">
                     <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
                         <div class="grid grid-cols-1 lg:grid-cols-5 gap-4 items-end">
@@ -210,7 +202,6 @@
                                 <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Hasta</label>
                                 <input type="date" id="filtro-hasta" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm">
                             </div>
-                            <!-- BOTONES DE EXPORTACIÓN PDF -->
                             <div class="lg:col-span-1 flex flex-col sm:flex-row gap-2 w-full">
                                 <button id="btn-pdf-detallado" class="flex-1 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium rounded-lg shadow-sm transition-colors cursor-pointer flex items-center justify-center gap-1.5">
                                     <i data-lucide="download" class="w-3.5 h-3.5"></i> PDF Detallado
@@ -266,7 +257,6 @@
                     </div>
                 </section>
 
-                <!-- 3. GESTIÓN DE PRODUCTOS / GASEOSAS + INVENTARIO -->
                 <section id="mod-gaseosas" class="tab-content space-y-6">
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm h-fit">
@@ -339,8 +329,20 @@
         let fechaEdicionOriginal = "";
         let desglosePrevioEdicion = [];
 
+        // FUNCIÓN AUXILIAR: Obtener la fecha actual en formato YYYY-MM-DD (Zona Horaria Perú)
+        function obtenerFechaLocalPeru() {
+            const fechaPeru = new Date(new Date().toLocaleString("en-US", {timeZone: "America/Lima"}));
+            const yyyy = fechaPeru.getFullYear();
+            const mm = String(fechaPeru.getMonth() + 1).padStart(2, '0');
+            const dd = String(fechaPeru.getDate()).padStart(2, '0');
+            return `${yyyy}-${mm}-${dd}`;
+        }
+
         lucide.createIcons();
-        document.getElementById('caja-fecha').value = new Date().toISOString().split('T')[0];
+        
+        // Forzar fecha por defecto en base a la hora de Perú
+        document.getElementById('caja-fecha').value = obtenerFechaLocalPeru();
+        
         document.getElementById('current-date').textContent = new Date().toLocaleDateString('es-ES', { 
             weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
         });
@@ -596,7 +598,7 @@
             
             document.getElementById('caja-fecha').disabled = false;
             document.getElementById('form-caja').reset();
-            document.getElementById('caja-fecha').value = new Date().toISOString().split('T')[0];
+            document.getElementById('caja-fecha').value = obtenerFechaLocalPeru();
             
             listaProductos.forEach(p => {
                 document.getElementById(`label-stock-id-${p.id}`).textContent = `Stock disponible: ${p.stock || 0} u.`;
@@ -692,12 +694,12 @@
 
         function filtrarYAplicarDatos() {
             const filtro = filtroPeriodo.value;
-            const hoyStr = new Date().toISOString().split('T')[0];
+            const hoyStr = obtenerFechaLocalPeru(); // Ajustado a zona horaria de Perú
             let datosFiltrados = listaCierres;
 
             if (filtro === 'hoy') datosFiltrados = listaCierres.filter(c => c.fecha === hoyStr);
-            else if (filtro === 'semana') { const lim = new Date(); lim.setDate(lim.getDate() - 7); datosFiltrados = listaCierres.filter(c => new Date(c.fecha) >= lim); }
-            else if (filtro === 'mes') { const m = new Date().getMonth(); const a = new Date().getFullYear(); datosFiltrados = listaCierres.filter(c => { const f = new Date(c.fecha); return f.getMonth() === m && f.getFullYear() === a; }); }
+            else if (filtro === 'semana') { const lim = new Date(new Date().toLocaleString("en-US", {timeZone: "America/Lima"})); lim.setDate(lim.getDate() - 7); const limStr = `${lim.getFullYear()}-${String(lim.getMonth() + 1).padStart(2, '0')}-${String(lim.getDate()).padStart(2, '0')}`; datosFiltrados = listaCierres.filter(c => c.fecha >= limStr); }
+            else if (filtro === 'mes') { const fPeru = new Date(new Date().toLocaleString("en-US", {timeZone: "America/Lima"})); const m = fPeru.getMonth(); const a = fPeru.getFullYear(); datosFiltrados = listaCierres.filter(c => { const f = new Date(c.fecha + "T00:00:00"); return f.getMonth() === m && f.getFullYear() === a; }); }
             else if (filtro === 'dia-especifico') { const d = filtroDiaUnico.value; datosFiltrados = d ? listaCierres.filter(c => c.fecha === d) : []; }
             else if (filtro === 'personalizado') { const desdeVal = filtroDesde.value; const hastaVal = filtroHasta.value; if (desdeVal) datosFiltrados = datosFiltrados.filter(c => c.fecha >= desdeVal); if (hastaVal) datosFiltrados = datosFiltrados.filter(c => c.fecha <= hastaVal); }
 
@@ -819,7 +821,7 @@
             const doc = new jsPDF('p', 'mm', 'a4');
 
             // Determinar mes y año basado en los datos visibles o fecha actual
-            let referenciaFecha = new Date();
+            let referenciaFecha = new Date(new Date().toLocaleString("en-US", {timeZone: "America/Lima"}));
             if(datosFiltradosGlobal.length > 0) { referenciaFecha = new Date(datosFiltradosGlobal[0].fecha + "T00:00:00"); }
             const nombreMesStr = referenciaFecha.toLocaleDateString('es-ES', { month: 'long' }).toUpperCase();
             const añoStr = referenciaFecha.getFullYear();
@@ -847,9 +849,6 @@
             
             datosFiltradosGlobal.forEach(c => {
                 const diaNum = new Date(c.fecha + "T00:00:00").getDate();
-                // Ojo: En la hoja de Minka se declara el bruto total ingresado ese día (Yape+Plin+Efectivo+Gaseosas)
-                // Si requieres que solo sea gaseosas o neto, cambias 'total_neto' por 'gaseosas' o el campo que desees. 
-                // Usamos total_neto + gastos para representar la venta bruta real en soles de ese día:
                 const ventaBrutaDiaria = Number(c.total_neto) + Number(c.gastos);
                 ventasPorDiaDiccionario[diaNum] = ventaBrutaDiaria;
             });
@@ -872,7 +871,6 @@
 
             const cuerpoBloque2 = [];
             let subtotalBloque2 = 0;
-            // Verificar cuántos días reales tiene el mes en cuestión
             const añoActualCalculo = referenciaFecha.getFullYear();
             const mesActualCalculo = referenciaFecha.getMonth();
             const diasTotalesEnMes = new Date(añoActualCalculo, mesActualCalculo + 1, 0).getDate();
@@ -887,7 +885,6 @@
                         monto > 0 ? Number(monto).toFixed(2) : ""
                     ]);
                 } else {
-                    // Celdas del 31 vacías si el mes tiene menos días (ej: febrero/abril)
                     cuerpoBloque2.push([String(i), "", ""]);
                 }
             }
